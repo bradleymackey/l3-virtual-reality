@@ -3,7 +3,7 @@
 # Virtual Reality coursework 18/19
 
 ####################
-# Python 3.7.x
+# tested on Python 3.7.x
 # ensure that the `IMUData.csv` file is located in the same directory as this script
 ###################
 
@@ -27,10 +27,8 @@ def get_sanitized_imu_data():
         # normalize accelerometer
         acc_range = range(4,7)
         acc_len = np.linalg.norm(data[row,acc_range])
-        print("before:",data[row,acc_range])
         for col in acc_range:
             data[row,col] = 0.0 if acc_len==0.0 else float(data[row,col])/acc_len
-        print("after:",data[row,acc_range])
         # normalize magnetometer
         mag_range = range(7,10)
         mag_len = np.linalg.norm(data[row,mag_range])
@@ -38,6 +36,23 @@ def get_sanitized_imu_data():
             data[row,col] = 0.0 if mag_len==0.0 else float(data[row,col])/mag_len
     print("> Successfully normalized data.")
     return data 
+
+def euler_to_qtrn(angles):
+    """converts a numpy euler angle array [a b c] to a quaternion array [i j k]"""
+    pass
+
+def qtrn_to_euler(qtrn):
+    """converts a numpy quaternion array [i j k] to an euler angle array [a b c]"""
+    pass
+
+def qtrn_conj(qtrn):
+    """computes the conjugate of a quaternion, passed as a numpy array [i j k]"""
+    pass
+
+def qtrn_mult(qtrn_1, qtrn_2):
+    """computes the product of 2 quaternions"""
+    pass
+
 
 def main():
     get_sanitized_imu_data()
