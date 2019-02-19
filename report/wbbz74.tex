@@ -16,6 +16,13 @@
 
 \graphicspath{ {./images/} }
 
+% so that we can skip any number of items in an enumeration
+\makeatletter
+\newcommand{\skipitems}[1]{%
+  \addtocounter{\@enumctr}{#1}%
+}
+\makeatother
+
 \begin{document}
 
 \title{\textbf{Virtual Reality Summative}}
@@ -24,7 +31,16 @@
 \maketitle
 
 
-\section{Question Report}
+\section*{Question Remarks}
+
+\begin{enumerate}
+\item Provide a couple of sentences in the report for the function interfaces that you created (what is the input/output) (2 marks)
+\skipitems{1} % NO REPORT REQUIRED FOR QUESTION #2
+\item Try a few different alpha values (e.g., 0.01, 0.1, ...), investigate and comment on their effect on drift compensation in your report (7 marks)
+\item Try a few different alpha values (e.g., 0.01, 0.1, ...), investigate and comment on their effect on drift compensation in your report (5 marks).
+\end{enumerate}
+
+\section*{Visualisations}
 
 
 
