@@ -71,17 +71,17 @@ def qtrn_to_euler(qtrn):
 def qtrn_conj(qtrn):
     """computes the conjugate of a quaternion, passed as a numpy array [w i j k]"""
     (w, i, j, k) = (qtrn[0], qtrn[1], qtrn[2], qtrn[3])
-    return np.array([w,-i,-j,-k])
+    return np.array([w, -i, -j, -k])
 
 def qtrn_mult(qtrn_1, qtrn_2):
     """computes the product of 2 quaternions, each [w i j k]"""
     (a_w, a_x, a_y, a_z) = (qtrn_1[0], qtrn_1[1], qtrn_1[2], qtrn_1[3])
     (b_w, b_x, b_y, b_z) = (qtrn_2[0], qtrn_2[1], qtrn_2[2], qtrn_2[3])
     w = a_w*b_w - a_x*b_x - a_y*b_y - a_z*b_z
-    x = a_w*b_x + a_x*b_w + a_y*b_z - a_z*b_y
-    y = a_w*b_y - a_x*b_z + a_y*b_w + a_z*b_x
-    z = a_w*b_z + a_x*b_y - a_y*b_x + a_z*b_w
-    return np.array([w,x,y,z])
+    i = a_w*b_x + a_x*b_w + a_y*b_z - a_z*b_y
+    j = a_w*b_y - a_x*b_z + a_y*b_w + a_z*b_x
+    k = a_w*b_z + a_x*b_y - a_y*b_x + a_z*b_w
+    return np.array([w, i, j, k])
 
 # PROBLEM 2:
 
