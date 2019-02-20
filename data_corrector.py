@@ -11,6 +11,9 @@ import csv
 import numpy as np
 import math
 
+# the sample rate, in Hz
+IMU_SAMPLE_RATE = 256
+
 def get_sanitized_imu_data():
     """retrieves the IMU data from the `IMUData.csv` file"""
     data = []
@@ -19,58 +22,58 @@ def get_sanitized_imu_data():
         next(reader) # skip header
         for row in reader:
             data.append(row)
-    data = np.array(data)
+    data = np.array(data, dtype=np.float32)
     print(f"> Successfully retrieved {len(data)} items from IMUData.csv.")
     for row in range(len(data)):
         # rotational rate to radians
         for col in range(1,4):
-            data[row,col] = float(data[row,col]) * (np.pi/180) 
+            data[row,col] = data[row,col] * (np.pi/180) 
         # normalize accelerometer
         acc_range = range(4,7)
         acc_len = np.linalg.norm(data[row,acc_range])
         for col in acc_range:
-            data[row,col] = 0.0 if acc_len==0.0 else float(data[row,col])/acc_len
+            data[row,col] = 0.0 if acc_len==0.0 else data[row,col]/acc_len
         # normalize magnetometer
         mag_range = range(7,10)
         mag_len = np.linalg.norm(data[row,mag_range])
         for col in mag_range:
-            data[row,col] = 0.0 if mag_len==0.0 else float(data[row,col])/mag_len
+            data[row,col] = 0.0 if mag_len==0.0 else data[row,col]/mag_len
     print("> Successfully normalized data.")
     return data 
 
-def euler_to_qtrn(angles):
-    """converts a numpy euler angle array [x y z] to a quaternion array [x y z w]"""
-    (yaw, pitch, roll) = (angles[0], angles[1], angles[2])
-    qx = np.sin(roll/2) * np.cos(pitch/2) * np.cos(yaw/2) - np.cos(roll/2) * np.sin(pitch/2) * np.sin(yaw/2)
-    qy = np.cos(roll/2) * np.sin(pitch/2) * np.cos(yaw/2) + np.sin(roll/2) * np.cos(pitch/2) * np.sin(yaw/2)
-    qz = np.cos(roll/2) * np.cos(pitch/2) * np.sin(yaw/2) - np.sin(roll/2) * np.sin(pitch/2) * np.cos(yaw/2)
-    qw = np.cos(roll/2) * np.cos(pitch/2) * np.cos(yaw/2) + np.sin(roll/2) * np.sin(pitch/2) * np.sin(yaw/2)
-    return np.array([qx, qy, qz, qw])
+def reading_to_qtrn(angles):
+    """converts a numpy euler rotation at {IMU_SAMPLE_RATE}Hz [x y z] to a quaternion array [w i j k]"""
+    sample_time = float(1/IMU_SAMPLE_RATE)
+    rot_angle = np.linalg.norm(angles) * sample_time
+    rot_axis = np.repeat(1/np.linalg.norm(angles),3) * angles
+    (x, y, z) = (rot_axis[0], rot_axis[1], rot_axis[2])
+    w = np.cos(rot_angle/2)
+    i = np.sin(rot_angle/2) * x
+    j = np.sin(rot_angle/2) * y
+    k = np.sin(rot_angle/2) * z
+    return np.array([w, i, j, k])
 
 def qtrn_to_euler(qtrn):
-    """converts a numpy quaternion array [x y z w] to an euler angle array [x y z]"""
-    (x, y, z, w) = (qtrn[0], qtrn[1], qtrn[2], qtrn[3])
-    t0 = 2.0 * (w * x + y * z)
-    t1 = 1.0 - 2.0 * (x * x + y * y)
-    roll = math.atan2(t0, t1)
-    t2 = 2.0 * (w * y - z * x)
-    t2 = 1.0 if t2 > +1.0 else t2
-    t2 = -1.0 if t2 < -1.0 else t2
-    pitch = math.asin(t2)
-    t3 = 2.0 * (w * z + x * y)
-    t4 = 1.0 - 2.0 * (y * y + z * z)
-    yaw = math.atan2(t3, t4)
-    return np.array([yaw, pitch, roll])
+    """converts a numpy quaternion array [w i j k] to an euler angle array (axis of rotation followed by the angle rotated by) [x y z theta]"""
+    (w, i, j, k) = (qtrn[0], qtrn[1], qtrn[2], qtrn[3])
+    angle = 2 * np.arctan2(np.linalg.norm(qtrn[1:]), w)
+    if angle==0:
+        # angle is 0? all values are 0
+        return np.repeat(0.0,4)
+    axis_x = i/np.sin(angle/2)
+    axis_y = j/np.sin(angle/2)
+    axis_z = k/np.sin(angle/2)
+    return np.array([axis_x, axis_y, axis_z, angle])
 
 def qtrn_conj(qtrn):
-    """computes the conjugate of a quaternion, passed as a numpy array [x y z w]"""
-    (x, y, z, w) = (qtrn[0], qtrn[1], qtrn[2], qtrn[3])
-    return np.array([-x,-y,-z,w])
+    """computes the conjugate of a quaternion, passed as a numpy array [w i j k]"""
+    (w, i, j, k) = (qtrn[0], qtrn[1], qtrn[2], qtrn[3])
+    return np.array([w,-i,-j,-k])
 
 def qtrn_mult(qtrn_1, qtrn_2):
-    """computes the product of 2 quaternions, each [x y z w]"""
-    (a_x, a_y, a_z, a_w) = (qtrn_1[0], qtrn_1[1], qtrn_1[2], qtrn_1[3])
-    (b_x, b_y, b_z, b_w) = (qtrn_2[0], qtrn_2[1], qtrn_2[2], qtrn_2[3])
+    """computes the product of 2 quaternions, each [w i j k]"""
+    (a_w, a_x, a_y, a_z) = (qtrn_1[0], qtrn_1[1], qtrn_1[2], qtrn_1[3])
+    (b_w, b_x, b_y, b_z) = (qtrn_2[0], qtrn_2[1], qtrn_2[2], qtrn_2[3])
     w = a_w*b_w - a_x*b_x - a_y*b_y - a_z*b_z
     x = a_w*b_x + a_x*b_w + a_y*b_z - a_z*b_y
     y = a_w*b_y - a_x*b_z + a_y*b_w + a_z*b_x
@@ -78,9 +81,13 @@ def qtrn_mult(qtrn_1, qtrn_2):
     return np.array([x,y,z,w])
 
 def main():
-    get_sanitized_imu_data()
-    q = euler_to_qtrn(np.array([0.2,1.12,2.31]))
-    
+    data = get_sanitized_imu_data()
+    print(data.dtype)
+    print("input:",data[0,1:4])
+    q = reading_to_qtrn(data[0,1:4])
+    print("quat:",q)
+    r = qtrn_to_euler(q)
+    print("orig:",r)
 
 if __name__=="__main__":
     main()
