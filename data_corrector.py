@@ -46,8 +46,8 @@ def get_sanitized_imu_data():
 
 def euler_to_qtrn(euler):
     """converts euler angles (axis + rotation) [x y z theta] to a quaternion [w i j k]"""
-    angle = euler[3]
     (x, y, z) = (euler[0], euler[1], euler[2])
+    angle = euler[3]
     w = np.cos(angle/2)
     i = np.sin(angle/2) * x
     j = np.sin(angle/2) * y
@@ -95,7 +95,7 @@ def gyro_dead_reckoning(imu_data):
     sanitized IMU data should be input, progress will be reported"""
     # we start at the identity quaternion
     curr_pos = np.array([1,0,0,0], dtype=np.float32)
-    print(">>> Dead Reckoning <<<")
+    print(">>> Dead Reckoning (Gyro) <<<")
     print("> Start orientation:",curr_pos)
     gyro_range = range(1,4)
     for point in imu_data:
@@ -106,9 +106,9 @@ def gyro_dead_reckoning(imu_data):
 
 # PROBLEM 3:
 
-def gyro_and_acc_positioning(imu_data):
+def gyro_acc_positioning(imu_data):
     """computes current position using data both from the gyroscope and accelerometer"""
-    ALPHA = 0.001
+    ALPHA = 0.5
     print(">>> Accelerometer Correction <<<")
     curr_pos = np.array([1,0,0,0], dtype=np.float32)
     print("> Start orientation:",curr_pos)
@@ -140,11 +140,18 @@ def gyro_and_acc_positioning(imu_data):
     print("> End orientation:",curr_pos)
     return curr_pos
 
+# PROBLEM 4:
+
+def gyro_acc_mag_positioning(imu_data):
+    """corrects for tilt and yaw using the accelerometer and magnetometer"""
+    return None
+
 # MAIN:
 def main():
     imu_data = get_sanitized_imu_data()
-    end_gyro = gyro_dead_reckoning(imu_data)
-    end_gyro_acc = gyro_and_acc_positioning(imu_data)
+    end_bad = gyro_dead_reckoning(imu_data)
+    end_better = gyro_acc_positioning(imu_data)
+    end_best = gyro_acc_mag_positioning(imu_data)
 
 if __name__=="__main__":
     main()
