@@ -108,7 +108,7 @@ def gyro_dead_reckoning(imu_data):
 
 def gyro_acc_positioning(imu_data):
     """computes current position using data both from the gyroscope and accelerometer"""
-    ALPHA = 0.01
+    ALPHA = 0.5
     print(">>> Tilt Correction <<<")
     curr_pos = np.array([1,0,0,0], dtype=np.float32)
     print("> Start orientation:",curr_pos)
@@ -122,11 +122,11 @@ def gyro_acc_positioning(imu_data):
         #print("gyro pos:",curr_pos)
         ### convert acc data to the global frame
         acc_qtrn = reading_to_qtrn(point[acc_range])
-        glob_acc_qtrn = qtrn_mult(qtrn_mult(qtrn_conj(gyro_qtrn), acc_qtrn), gyro_qtrn)
+        acc_qtrn = qtrn_mult(qtrn_mult(qtrn_conj(gyro_qtrn), acc_qtrn), gyro_qtrn)
         ### calculate the tilt error
         # x = index 1, z = index 3 (index 0 is w, which relates to angle, and we don't care about this at the moment)
-        tilt_error_axis = np.array([glob_acc_qtrn[3], 0.0, glob_acc_qtrn[1]])
-        acc_vector = qtrn_to_euler(glob_acc_qtrn)
+        tilt_error_axis = np.array([acc_qtrn[3], 0.0, acc_qtrn[1]])
+        acc_vector = qtrn_to_euler(acc_qtrn)
         #print("acc_vector:",acc_vector)
         cos_ang = np.dot(ref_vector, acc_vector[:3])
         tilt_error_angle = np.arccos(cos_ang)
@@ -156,6 +156,7 @@ def gyro_acc_mag_positioning(imu_data):
 
     # take reference measurements for yaw correction
     m_ref = reading_to_qtrn(imu_data[0,mag_range])
+    print("m_ref:",m_ref)
     # transform m_ref to the global frame
     m_ref = qtrn_mult(qtrn_mult(qtrn_conj(curr_pos), m_ref), curr_pos)
 
@@ -189,8 +190,17 @@ def gyro_acc_mag_positioning(imu_data):
     print("> End orientation:",curr_pos)
     return curr_pos
 
+
+def test():
+    angles = [0.2,1.12,2.31,2.1899]
+    q = euler_to_qtrn(angles)
+    print("q:",q)
+    r = qtrn_to_euler(q)
+    print("r:",r)
+
 # MAIN:
 def main():
+    test()
     imu_data = get_sanitized_imu_data()
     print()
     end_bad = gyro_dead_reckoning(imu_data)
