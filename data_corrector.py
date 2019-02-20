@@ -44,17 +44,22 @@ def get_sanitized_imu_data():
     print("> Successfully normalized data.")
     return data 
 
+def euler_to_qtrn(euler):
+    """converts euler angles (axis + rotation) [x y z theta] to a quaternion [w i j k]"""
+    angle = euler[3]
+    (x, y, z) = (euler[0], euler[1], euler[2])
+    w = np.cos(angle/2)
+    i = np.sin(angle/2) * x
+    j = np.sin(angle/2) * y
+    k = np.sin(angle/2) * z
+    return np.array([w, i, j, k])
+
 def reading_to_qtrn(angles):
     """converts a numpy euler rotation at {IMU_SAMPLE_RATE}Hz [x y z] to a quaternion array [w i j k]"""
     sample_time = float(1/IMU_SAMPLE_RATE)
     rot_angle = np.linalg.norm(angles) * sample_time
     rot_axis = np.repeat(1/np.linalg.norm(angles),3) * angles
-    (x, y, z) = (rot_axis[0], rot_axis[1], rot_axis[2])
-    w = np.cos(rot_angle/2)
-    i = np.sin(rot_angle/2) * x
-    j = np.sin(rot_angle/2) * y
-    k = np.sin(rot_angle/2) * z
-    return np.array([w, i, j, k])
+    return euler_to_qtrn(np.append(rot_axis,rot_angle))
 
 def qtrn_to_euler(qtrn):
     """converts a numpy quaternion array [w i j k] to an euler angle array (axis of rotation followed by the angle rotated by) [x y z theta]"""
@@ -91,23 +96,55 @@ def gyro_dead_reckoning(imu_data):
     # we start at the identity quaternion
     curr_pos = np.array([1,0,0,0], dtype=np.float32)
     print(">>> Dead Reckoning <<<")
-    print("> Start position:",curr_pos)
+    print("> Start orientation:",curr_pos)
     gyro_range = range(1,4)
     for point in imu_data:
         point_qtrn = reading_to_qtrn(point[gyro_range])
         curr_pos = qtrn_mult(curr_pos, point_qtrn)
-    print("> End position:",curr_pos)
+    print("> End orientation:",curr_pos)
     return curr_pos
 
 # PROBLEM 3:
 
-
+def gyro_and_acc_positioning(imu_data):
+    """computes current position using data both from the gyroscope and accelerometer"""
+    ALPHA = 0.001
+    print(">>> Accelerometer Correction <<<")
+    curr_pos = np.array([1,0,0,0], dtype=np.float32)
+    print("> Start orientation:",curr_pos)
+    gyro_range = range(1,4)
+    acc_range = range(4,7)
+    ref_vector = np.array([0.,1.,0.], dtype=np.float32)
+    for point in imu_data:
+        ### calculate initial position only using the gyro
+        gyro_qtrn = reading_to_qtrn(point[gyro_range])
+        curr_pos = qtrn_mult(curr_pos, gyro_qtrn)
+        #print("gyro pos:",curr_pos)
+        ### convert acc data to the global frame
+        acc_qtrn = reading_to_qtrn(point[acc_range])
+        glob_acc_qtrn = qtrn_mult(qtrn_mult(qtrn_conj(gyro_qtrn), acc_qtrn), gyro_qtrn)
+        ### calculate the tilt error
+        # x = index 1, z = index 3 (index 0 is w, which relates to angle, and we don't care about this at the moment)
+        tilt_error_axis = np.array([glob_acc_qtrn[3], 0.0, glob_acc_qtrn[1]])
+        acc_vector = qtrn_to_euler(glob_acc_qtrn)
+        #print("acc_vector:",acc_vector)
+        cos_ang = np.dot(ref_vector, acc_vector[:3])
+        tilt_error_angle = np.arccos(cos_ang)
+        #print("error axis:",tilt_error_axis)
+        #print("error angle:",tilt_error_angle)
+        comp_filter = euler_to_qtrn(np.append(tilt_error_axis,-ALPHA*tilt_error_angle))
+        #print("comp filter:",comp_filter)
+        curr_pos = qtrn_mult(comp_filter, curr_pos)
+        #print("new position",curr_pos)
+        #print()
+    print("> End orientation:",curr_pos)
+    return curr_pos
 
 # MAIN:
 def main():
-    data = get_sanitized_imu_data()
-    gyro_dead_reckoning(data)
-
+    imu_data = get_sanitized_imu_data()
+    end_gyro = gyro_dead_reckoning(imu_data)
+    end_gyro_acc = gyro_and_acc_positioning(imu_data)
 
 if __name__=="__main__":
     main()
