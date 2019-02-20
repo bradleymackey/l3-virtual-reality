@@ -85,7 +85,7 @@ def qtrn_mult(qtrn_1, qtrn_2):
 
 # PROBLEM 2:
 
-def dead_reckoning(imu_data):
+def gyro_dead_reckoning(imu_data):
     """implementation of dead-reckoning filter - estimating position only using the gyro
     sanitized IMU data should be input, progress will be reported"""
     # we start at the identity quaternion
@@ -99,17 +99,14 @@ def dead_reckoning(imu_data):
     print("> End position:",curr_pos)
     return curr_pos
 
-# EXECUTION:
+# PROBLEM 3:
 
+
+
+# MAIN:
 def main():
     data = get_sanitized_imu_data()
-    dead_reckoning(data)
-    # print(data.dtype)
-    # print("input:",data[0,1:4])
-    # q = reading_to_qtrn(data[0,1:4])
-    # print("quat:",q)
-    # r = qtrn_to_euler(q)
-    # print("euler:",r)
+    gyro_dead_reckoning(data)
 
 
 if __name__=="__main__":
