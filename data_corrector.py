@@ -63,7 +63,7 @@ def reading_to_qtrn(angles):
 
 def qtrn_to_euler(qtrn):
     """converts a numpy quaternion array [w i j k] to an euler angle array (axis of rotation followed by the angle rotated by) [x y z theta]"""
-    (w, i, j, k) = qtrn[:4]
+    (w, i, j, k) = qtrn
     angle = 2 * np.arctan2(np.linalg.norm(qtrn[1:]), w)
     if angle==0:
         # angle is 0? all values are 0
