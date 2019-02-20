@@ -14,8 +14,11 @@ import math
 # the sample rate, in Hz
 IMU_SAMPLE_RATE = 256
 
+# PROBLEM 1:
+
 def get_sanitized_imu_data():
     """retrieves the IMU data from the `IMUData.csv` file"""
+    print(">>> Data Extraction <<<")
     data = []
     with open('IMUData.csv', 'r') as f:
         reader = csv.reader(f, delimiter=',')
@@ -78,16 +81,36 @@ def qtrn_mult(qtrn_1, qtrn_2):
     x = a_w*b_x + a_x*b_w + a_y*b_z - a_z*b_y
     y = a_w*b_y - a_x*b_z + a_y*b_w + a_z*b_x
     z = a_w*b_z + a_x*b_y - a_y*b_x + a_z*b_w
-    return np.array([x,y,z,w])
+    return np.array([w,x,y,z])
+
+# PROBLEM 2:
+
+def dead_reckoning(imu_data):
+    """implementation of dead-reckoning filter - estimating position only using the gyro
+    sanitized IMU data should be input, progress will be reported"""
+    # we start at the identity quaternion
+    curr_pos = np.array([1,0,0,0], dtype=np.float32)
+    print(">>> Dead Reckoning <<<")
+    print("> Start position:",curr_pos)
+    gyro_range = range(1,4)
+    for point in imu_data:
+        point_qtrn = reading_to_qtrn(point[gyro_range])
+        curr_pos = qtrn_mult(curr_pos, point_qtrn)
+    print("> End position:",curr_pos)
+    return curr_pos
+
+# EXECUTION:
 
 def main():
     data = get_sanitized_imu_data()
-    print(data.dtype)
-    print("input:",data[0,1:4])
-    q = reading_to_qtrn(data[0,1:4])
-    print("quat:",q)
-    r = qtrn_to_euler(q)
-    print("orig:",r)
+    dead_reckoning(data)
+    # print(data.dtype)
+    # print("input:",data[0,1:4])
+    # q = reading_to_qtrn(data[0,1:4])
+    # print("quat:",q)
+    # r = qtrn_to_euler(q)
+    # print("euler:",r)
+
 
 if __name__=="__main__":
     main()
