@@ -46,7 +46,7 @@ def get_sanitized_imu_data():
 
 def euler_to_qtrn(euler):
     """converts euler angles (axis + rotation) [x y z theta] to a quaternion [w i j k]"""
-    (x, y, z) = (euler[0], euler[1], euler[2])
+    (x, y, z) = euler[:3]
     angle = euler[3]
     w = np.cos(angle/2)
     i = np.sin(angle/2) * x
@@ -63,7 +63,7 @@ def reading_to_qtrn(angles):
 
 def qtrn_to_euler(qtrn):
     """converts a numpy quaternion array [w i j k] to an euler angle array (axis of rotation followed by the angle rotated by) [x y z theta]"""
-    (w, i, j, k) = (qtrn[0], qtrn[1], qtrn[2], qtrn[3])
+    (w, i, j, k) = qtrn[:4]
     angle = 2 * np.arctan2(np.linalg.norm(qtrn[1:]), w)
     if angle==0:
         # angle is 0? all values are 0
@@ -75,13 +75,13 @@ def qtrn_to_euler(qtrn):
 
 def qtrn_conj(qtrn):
     """computes the conjugate of a quaternion, passed as a numpy array [w i j k]"""
-    (w, i, j, k) = (qtrn[0], qtrn[1], qtrn[2], qtrn[3])
+    (w, i, j, k) = qtrn
     return np.array([w, -i, -j, -k])
 
-def qtrn_mult(qtrn_1, qtrn_2):
+def qtrn_mult(qtrn_a, qtrn_b):
     """computes the product of 2 quaternions, each [w i j k]"""
-    (a_w, a_x, a_y, a_z) = (qtrn_1[0], qtrn_1[1], qtrn_1[2], qtrn_1[3])
-    (b_w, b_x, b_y, b_z) = (qtrn_2[0], qtrn_2[1], qtrn_2[2], qtrn_2[3])
+    (a_w, a_x, a_y, a_z) = qtrn_a
+    (b_w, b_x, b_y, b_z) = qtrn_b
     w = a_w*b_w - a_x*b_x - a_y*b_y - a_z*b_z
     i = a_w*b_x + a_x*b_w + a_y*b_z - a_z*b_y
     j = a_w*b_y - a_x*b_z + a_y*b_w + a_z*b_x
@@ -108,8 +108,8 @@ def gyro_dead_reckoning(imu_data):
 
 def gyro_acc_positioning(imu_data):
     """computes current position using data both from the gyroscope and accelerometer"""
-    ALPHA = 0.5
-    print(">>> Accelerometer Correction <<<")
+    ALPHA = 0.01
+    print(">>> Tilt Correction <<<")
     curr_pos = np.array([1,0,0,0], dtype=np.float32)
     print("> Start orientation:",curr_pos)
     gyro_range = range(1,4)
@@ -132,6 +132,7 @@ def gyro_acc_positioning(imu_data):
         tilt_error_angle = np.arccos(cos_ang)
         #print("error axis:",tilt_error_axis)
         #print("error angle:",tilt_error_angle)
+        ### Repair tilt using the comp filter
         comp_filter = euler_to_qtrn(np.append(tilt_error_axis,-ALPHA*tilt_error_angle))
         #print("comp filter:",comp_filter)
         curr_pos = qtrn_mult(comp_filter, curr_pos)
@@ -144,7 +145,33 @@ def gyro_acc_positioning(imu_data):
 
 def gyro_acc_mag_positioning(imu_data):
     """corrects for tilt and yaw using the accelerometer and magnetometer"""
-    return None
+    ALPHA = 0.01
+    print(">>> Tilt and Yaw Correction <<<")
+    curr_pos = np.array([1,0,0,0], dtype=np.float32)
+    print("> Start orientation:",curr_pos)
+    gyro_range = range(1,4)
+    acc_range = range(4,7)
+    mag_range = range(7,10)
+    ref_vector = np.array([0.,1.,0.], dtype=np.float32)
+    for point in imu_data:
+        ### calculate initial position only using the gyro
+        gyro_qtrn = reading_to_qtrn(point[gyro_range])
+        curr_pos = qtrn_mult(curr_pos, gyro_qtrn)
+        ### convert acc data to the global frame
+        acc_qtrn = reading_to_qtrn(point[acc_range])
+        glob_acc_qtrn = qtrn_mult(qtrn_mult(qtrn_conj(gyro_qtrn), acc_qtrn), gyro_qtrn)
+        ### calculate the tilt error
+        # x = index 1, z = index 3 (index 0 is w, which relates to angle, and we don't care about this at the moment)
+        tilt_error_axis = np.array([glob_acc_qtrn[3], 0.0, glob_acc_qtrn[1]])
+        acc_vector = qtrn_to_euler(glob_acc_qtrn)
+        cos_ang = np.dot(ref_vector, acc_vector[:3])
+        tilt_error_angle = np.arccos(cos_ang)
+        ### Repair tilt using the comp filter
+        comp_filter = euler_to_qtrn(np.append(tilt_error_axis,-ALPHA*tilt_error_angle))
+        curr_pos = qtrn_mult(comp_filter, curr_pos)
+
+    print("> End orientation:",curr_pos)
+    return curr_pos
 
 # MAIN:
 def main():
