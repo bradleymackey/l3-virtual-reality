@@ -54,7 +54,7 @@ def euler_to_qtrn(euler):
 def reading_to_qtrn(reading, prev_sample_time):
     """converts a numpy euler rotation sample [time x y z] and prev sample time to a quaternion array [a b c d]"""
     sample_time = float(reading[0] - prev_sample_time)
-    sample_time = sample_time if sample_time>0 else (1/256)
+    sample_time = sample_time if sample_time>0 else (1/256) # first reading assumes 256Hz
     rot_angle = np.linalg.norm(reading[1:]) * sample_time
     rot_axis = np.repeat(1/np.linalg.norm(reading[1:]),3) * reading[1:]
     return euler_to_qtrn(np.append(rot_axis,rot_angle))
@@ -108,7 +108,7 @@ def gyro_dead_reckoning(imu_data):
 
 def gyro_acc_positioning(imu_data):
     """computes current position using data both from the gyroscope and accelerometer"""
-    ALPHA = 0.001
+    ALPHA = 0.01
     print(">>> Tilt Correction <<<")
     curr_pos = np.array([1,0,0,0], dtype=np.float32)
     print("> Start orientation:",curr_pos)
@@ -121,27 +121,21 @@ def gyro_acc_positioning(imu_data):
         delta_qtrn = reading_to_qtrn(point[gyro_range], prev_sample_time)
         prev_sample_time = point[0]
         curr_pos = qtrn_mult(delta_qtrn, curr_pos)
-        #print("gyro pos:",curr_pos)
         ### convert acc data to the global frame
         acc_qtrn = np.insert(point[acc_range], 0, 0)
         acc_qtrn = qtrn_mult(qtrn_mult(curr_pos, acc_qtrn), qtrn_conj(curr_pos))
         ### calculate the tilt error
         # x = index 1, z = index 3 (we disregard the first element, it is not needed for rotating a simple point as we just rotated acc to the global frame)
         tilt_error_axis = np.array([acc_qtrn[3], 0.0, -acc_qtrn[1]])
-        #print("acc_vector:",acc_vector)
         cos_ang = np.dot(ref_vector, acc_qtrn[1:])
+        # account for any rounding errors
         cos_ang = cos_ang if cos_ang > -1 else -1
         cos_ang = cos_ang if cos_ang < 1 else 1
         tilt_error_angle = np.arccos(cos_ang)
-        #print("error axis:",tilt_error_axis)
-        #print("error angle:",tilt_error_angle)
         ### Repair tilt using the comp filter
         comp_filter = euler_to_qtrn(np.append(tilt_error_axis,-ALPHA*tilt_error_angle))
-        #print("comp filter:",comp_filter)
         # fix the delta using the corrected acceleration data
-        #delta_qtrn = qtrn_mult(comp_filter, delta_qtrn)
         curr_pos = qtrn_mult(comp_filter, curr_pos)
-        #print("new position",curr_pos)
         #print()
     print("> End orientation:",curr_pos)
     print("end check:",np.linalg.norm(curr_pos))
