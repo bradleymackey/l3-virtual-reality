@@ -42,7 +42,7 @@ def get_sanitized_imu_data():
     return data 
 
 def euler_to_qtrn(axis, angle):
-    """converts euler angles (axis-angle repr.) [x y z] + angle to a quaternion [a b c d]"""
+    """converts euler angles (axis-angle repr.) ([x y z], angle) to a quaternion [a b c d]"""
     (x, y, z) = axis
     a = np.cos(angle/2)
     b = np.sin(angle/2) * x
@@ -96,9 +96,12 @@ def gyro_dead_reckoning(imu_data):
     gyro_range = range(0,4)
     prev_sample_time = 0.0
     for point in imu_data:
+        
+        ### COMPUTE NEW POSITION
         delta_qtrn = reading_to_qtrn(point[gyro_range], prev_sample_time)
         prev_sample_time = point[0]
         curr_pos = qtrn_mult(delta_qtrn, curr_pos)
+
     print("> End orientation:",curr_pos)
     print("end check:",np.linalg.norm(curr_pos))
     return curr_pos
@@ -117,10 +120,14 @@ def gyro_acc_positioning(imu_data):
     ref_vector = np.array([0,1,0], dtype=np.float32)
     prev_sample_time = 0.0
     for point in imu_data:
+
+        ### INITIAL POSITION
         ### calculate initial position only using the gyro
         delta_qtrn = reading_to_qtrn(point[gyro_range], prev_sample_time)
         prev_sample_time = point[0]
         curr_pos = qtrn_mult(delta_qtrn, curr_pos)
+
+        ### PITCH/TILT CORRECTION
         ### convert acc data to the global frame
         # (this is the inverse of the head orientation!)
         # therefore, we compute q^-1•p•q rather than q•p•q^-1
@@ -138,6 +145,7 @@ def gyro_acc_positioning(imu_data):
         comp_filter = euler_to_qtrn(tilt_error_axis, -ALPHA_ACC*tilt_error_angle)
         # fix our current estimated position using acceleration data
         curr_pos = qtrn_mult(comp_filter, curr_pos)
+
     print("> End orientation:",curr_pos)
     print("end check:",np.linalg.norm(curr_pos))
     return curr_pos
@@ -157,9 +165,8 @@ def gyro_acc_mag_positioning(imu_data):
     mag_range = range(7,10)
     ref_vector = np.array([0,1,0], dtype=np.float32)
 
-    # take reference measurements for yaw correction
+    # take reference measurement for yaw correction
     m_ref = np.insert(imu_data[0,mag_range], 0, 0)
-    print("m_ref:",m_ref)
     # transform m_ref to the global frame
     # (this is the inverse of the head orientation!)
     # therefore, we compute q^-1•p•q rather than q•p•q^-1
@@ -167,10 +174,14 @@ def gyro_acc_mag_positioning(imu_data):
 
     prev_sample_time = 0.0
     for point in imu_data:
+
+        ### INITIAL POSITION
         ### calculate initial position only using the gyro
         delta_qtrn = reading_to_qtrn(point[gyro_range], prev_sample_time)
         prev_sample_time = point[0]
         curr_pos = qtrn_mult(delta_qtrn, curr_pos)
+
+        ### PITCH/TILT CORRECTION
         ### convert acc data to the global frame
         # (this is the inverse of the head orientation!)
         # therefore, we compute q^-1•p•q rather than q•p•q^-1
@@ -189,6 +200,7 @@ def gyro_acc_mag_positioning(imu_data):
         # fix our current estimated position using acceleration data
         curr_pos = qtrn_mult(comp_filter, curr_pos)
 
+        ### YAW CORRECTION
         ### convert mag data to the global frame
         # (this is the inverse of the head orientation!)
         # therefore, we compute q^-1•p•q rather than q•p•q^-1
@@ -203,6 +215,7 @@ def gyro_acc_mag_positioning(imu_data):
         tilt_yaw_axis = np.array([0, 1, 0])
         comp_filter = euler_to_qtrn(tilt_yaw_axis, -ALPHA_YAW*yaw_diff)
         curr_pos = qtrn_mult(comp_filter, curr_pos)
+
     print("> End orientation:",curr_pos)
     print("end check:",np.linalg.norm(curr_pos))
     return curr_pos
