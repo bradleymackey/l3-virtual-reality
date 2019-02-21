@@ -65,17 +65,12 @@ def reading_to_qtrn(reading, prev_sample_time):
     return euler_to_qtrn(rot_axis, rot_angle)
 
 def qtrn_to_euler(qtrn):
-    """converts a numpy quaternion array [a b c d] to an euler angle array (axis of rotation followed by the angle rotated by) ([x y z], theta)"""
+    """converts a numpy quaternion array [a b c d] to a raw euler angle array [x y z]"""
     (a, b, c, d) = qtrn
-    angle = 2 * np.arccos(a)
-    if angle==0.0:
-        # identity quaternion/rotation (= no rotation)
-        return (np.array([1, 0, 0]), 0)
-    divisor = 1/np.sqrt(1-(a**2))
-    x, y, z = b/divisor, c/divisor, d/divisor
-    axis = np.array([x, y, z]) 
-    norm_axis = axis / np.sqrt(np.sum(axis**2))
-    return (norm_axis, angle)
+    x = np.arcsin(2*b*c + 2*d*a)
+    y = np.arctan2(2*c*a-2*b*d, 1 - 2*(c**2) - 2*(d**2))
+    z = np.arctan2(2*b*a-2*c*d , 1 - 2*(b**2) - 2*(d**2))
+    return np.array([x,y,z])
 
 def qtrn_conj(qtrn):
     """computes the conjugate of a quaternion, passed as a numpy array [a b c d]"""
@@ -101,10 +96,7 @@ def gyro_dead_reckoning(imu_data):
     curr_pos = np.array([1, 0, 0, 0], dtype=np.float32)
     print(">>> Dead Reckoning (Gyro) <<<")
     print("> Start orientation:",curr_pos)
-    start_axis, angle = qtrn_to_euler(curr_pos)
-    print("start axis",start_axis,"angle",angle)
     gyro_range = range(0,4)
-
     # time,x,y,z
     gyro_data = []
 
@@ -115,13 +107,11 @@ def gyro_dead_reckoning(imu_data):
         # update the position using the gyroscope
         delta_qtrn = reading_to_qtrn(point[gyro_range], prev_sample_time)
         prev_sample_time = point[0]
-        curr_pos = qtrn_mult(delta_qtrn, curr_pos)
+        curr_pos = qtrn_mult(curr_pos, delta_qtrn)
 
         gyro_data.append([prev_sample_time] + curr_pos.tolist())
 
     print("> End orientation:",curr_pos)
-    end_axis, angle = qtrn_to_euler(curr_pos)
-    print("end axis",end_axis,"angle",angle)
     print("end check:",np.linalg.norm(curr_pos))
     return gyro_data
 
@@ -136,9 +126,7 @@ def gyro_acc_positioning(imu_data):
     print("> Start orientation:",curr_pos)
     gyro_range = range(0,4)
     acc_range = range(4,7)
-    ref_vector = np.array([0,1,0], dtype=np.float32)
-    end_axis, angle = qtrn_to_euler(curr_pos)
-    print("start axis",end_axis,"angle",angle)
+    #ref_vector = np.array([0,1,0], dtype=np.float32)
 
     # time,x,y,z
     gyro_data = []
@@ -150,7 +138,7 @@ def gyro_acc_positioning(imu_data):
         ### calculate initial position only using the gyro
         delta_qtrn = reading_to_qtrn(point[gyro_range], prev_sample_time)
         prev_sample_time = point[0]
-        curr_pos = qtrn_mult(delta_qtrn, curr_pos)
+        curr_pos = qtrn_mult(curr_pos, delta_qtrn)
 
         ### PITCH/TILT CORRECTION
         ### convert acc data to the global frame
@@ -161,22 +149,18 @@ def gyro_acc_positioning(imu_data):
         ### calculate the tilt error
         # x = index 1, z = index 3 (we disregard the first element, it is not needed for rotating a simple point as we just rotated acc to the global frame)
         tilt_error_axis = np.array([acc_qtrn[3], 0.0, -acc_qtrn[1]])
-        cos_ang = np.dot(ref_vector, acc_qtrn[1:])
-        # account for any rounding errors
+        cos_ang = np.dot(np.array([0,1,0]), acc_qtrn[1:])
         cos_ang = cos_ang if cos_ang > -1 else -1
         cos_ang = cos_ang if cos_ang < 1 else 1
         tilt_error_angle = np.arccos(cos_ang)
         ### Repair tilt using the comp filter
         comp_filter = euler_to_qtrn(tilt_error_axis, -ALPHA_ACC*tilt_error_angle)
         # fix our current estimated position using acceleration data
-        curr_pos = qtrn_mult(comp_filter, curr_pos)
+        curr_pos = qtrn_mult(curr_pos, comp_filter)
 
         gyro_data.append([prev_sample_time] + curr_pos.tolist())
 
-
     print("> End orientation:",curr_pos)
-    end_axis, angle = qtrn_to_euler(curr_pos)
-    print("end axis",end_axis,"angle",angle)
 
     print("end check:",np.linalg.norm(curr_pos))
     return gyro_data
@@ -213,7 +197,7 @@ def gyro_acc_mag_positioning(imu_data):
         ### calculate initial position only using the gyro
         delta_qtrn = reading_to_qtrn(point[gyro_range], prev_sample_time)
         prev_sample_time = point[0]
-        curr_pos = qtrn_mult(delta_qtrn, curr_pos)
+        curr_pos = qtrn_mult(curr_pos, delta_qtrn)
 
         ### PITCH/TILT CORRECTION
         ### convert acc data to the global frame
@@ -328,13 +312,14 @@ def save_gyro_fig(name, title, data):
     z_data = []
     for point in data:
         time_data.append(point[0])
-        x_data.append(point[1]/(np.pi/180))
-        y_data.append(point[2]/(np.pi/180))
-        z_data.append(point[3]/(np.pi/180))
+        x, y, z = qtrn_to_euler(point[1:])
+        x_data.append(x/(np.pi/180))
+        y_data.append(y/(np.pi/180))
+        z_data.append(z/(np.pi/180))
     plt.clf()
     fig, ax = plt.subplots()
     plt.xlabel("Time (s)")
-    plt.ylabel("Angular Rate (degs^-1)")
+    plt.ylabel("Euler Angle (degs)")
     plt.title(title)
     ax.plot(time_data, x_data, 'r-', label="X")
     ax.plot(time_data, y_data, 'g-', label="Y")
@@ -351,7 +336,7 @@ def test():
 
 # MAIN:
 def main():
-    test()
+    #test()
     raw_data = get_raw_imu_data()
     save_unmodified_figs(raw_data)
     imu_data = sanitize_imu_data(raw_data)
