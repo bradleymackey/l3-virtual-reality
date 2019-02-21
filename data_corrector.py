@@ -45,48 +45,47 @@ def get_sanitized_imu_data():
     return data 
 
 def euler_to_qtrn(euler):
-    """converts euler angles (axis + rotation) [x y z theta] to a quaternion [w i j k]"""
+    """converts euler angles (axis + rotation) [x y z theta] to a quaternion [a b c d]"""
     (x, y, z) = euler[:3]
     angle = euler[3]
-    w = np.cos(angle/2)
-    i = np.sin(angle/2) * x
-    j = np.sin(angle/2) * y
-    k = np.sin(angle/2) * z
-    return np.array([w, i, j, k])
+    a = np.cos(angle/2)
+    b = np.sin(angle/2) * x
+    c = np.sin(angle/2) * y
+    d = np.sin(angle/2) * z
+    return np.array([a, b, c, d])
 
 def reading_to_qtrn(angles):
-    """converts a numpy euler rotation at {IMU_SAMPLE_RATE}Hz [x y z] to a quaternion array [w i j k]"""
+    """converts a numpy euler rotation at {IMU_SAMPLE_RATE}Hz [x y z] to a quaternion array [a b c d]"""
     sample_time = float(1/IMU_SAMPLE_RATE)
     rot_angle = np.linalg.norm(angles) * sample_time
     rot_axis = np.repeat(1/np.linalg.norm(angles),3) * angles
     return euler_to_qtrn(np.append(rot_axis,rot_angle))
 
 def qtrn_to_euler(qtrn):
-    """converts a numpy quaternion array [w i j k] to an euler angle array (axis of rotation followed by the angle rotated by) [x y z theta]"""
-    (w, i, j, k) = qtrn
-    angle = 2 * np.arctan2(np.linalg.norm(qtrn[1:]), w)
+    """converts a numpy quaternion array [a b c d] to an euler angle array (axis of rotation followed by the angle rotated by) [x y z theta]"""
+    (a, b, c, d) = qtrn
+    angle = 2 * np.arccos(a)
     if angle==0:
-        # angle is 0? all values are 0
-        return np.repeat(0.0,4)
-    axis_x = i/np.sin(angle/2)
-    axis_y = j/np.sin(angle/2)
-    axis_z = k/np.sin(angle/2)
-    return np.array([axis_x, axis_y, axis_z, angle])
+        # angle is 0? identity quaternion/rotation (= no rotation)
+        return np.array([1, 0, 0, 0])
+    divisor = 1/np.sqrt(1-(a**2))
+    x, y, z = b/divisor, c/divisor, d/divisor
+    return np.array([x, y, z, angle])
 
 def qtrn_conj(qtrn):
-    """computes the conjugate of a quaternion, passed as a numpy array [w i j k]"""
-    (w, i, j, k) = qtrn
-    return np.array([w, -i, -j, -k])
+    """computes the conjugate of a quaternion, passed as a numpy array [a b c d]"""
+    (a, b, c, d) = qtrn
+    return np.array([a, -b, -c, -d])
 
 def qtrn_mult(qtrn_a, qtrn_b):
-    """computes the product of 2 quaternions, each [w i j k]"""
-    (a_w, a_x, a_y, a_z) = qtrn_a
-    (b_w, b_x, b_y, b_z) = qtrn_b
-    w = a_w*b_w - a_x*b_x - a_y*b_y - a_z*b_z
-    i = a_w*b_x + a_x*b_w + a_y*b_z - a_z*b_y
-    j = a_w*b_y - a_x*b_z + a_y*b_w + a_z*b_x
-    k = a_w*b_z + a_x*b_y - a_y*b_x + a_z*b_w
-    return np.array([w, i, j, k])
+    """computes the product of 2 quaternions, each [a b c d]"""
+    (a_1, b_1, c_1, d_1) = qtrn_a
+    (a_2, b_2, c_2, d_2) = qtrn_b
+    a = a_1*a_2 - b_1*b_2 - c_1*c_2 - d_1*d_2
+    b = a_1*b_2 + b_1*a_2 + c_1*d_2 - d_1*c_2
+    c = a_1*c_2 - b_1*d_2 + c_1*a_2 + d_1*b_2
+    d = a_1*d_2 + b_1*c_2 - c_1*b_2 + d_1*a_2
+    return np.array([a, b, c, d])
 
 # PROBLEM 2:
 
@@ -94,13 +93,14 @@ def gyro_dead_reckoning(imu_data):
     """implementation of dead-reckoning filter - estimating position only using the gyro
     sanitized IMU data should be input, progress will be reported"""
     # we start at the identity quaternion
-    curr_pos = np.array([1,0,0,0], dtype=np.float32)
+    curr_pos = np.array([1, 0, 0, 0], dtype=np.float32)
     print(">>> Dead Reckoning (Gyro) <<<")
     print("> Start orientation:",curr_pos)
     gyro_range = range(1,4)
     for point in imu_data:
         point_qtrn = reading_to_qtrn(point[gyro_range])
         curr_pos = qtrn_mult(curr_pos, point_qtrn)
+        print("curr pos len:",np.linalg.norm(curr_pos))
     print("> End orientation:",curr_pos)
     return curr_pos
 
@@ -108,7 +108,7 @@ def gyro_dead_reckoning(imu_data):
 
 def gyro_acc_positioning(imu_data):
     """computes current position using data both from the gyroscope and accelerometer"""
-    ALPHA = 0.5
+    ALPHA = 0.01
     print(">>> Tilt Correction <<<")
     curr_pos = np.array([1,0,0,0], dtype=np.float32)
     print("> Start orientation:",curr_pos)
