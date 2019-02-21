@@ -41,10 +41,9 @@ def get_sanitized_imu_data():
     print("> Successfully normalized data.")
     return data 
 
-def euler_to_qtrn(euler):
-    """converts euler angles (axis + rotation) [x y z theta] to a quaternion [a b c d]"""
-    (x, y, z) = euler[:3]
-    angle = euler[3]
+def euler_to_qtrn(axis, angle):
+    """converts euler angles (axis-angle repr.) [x y z] + angle to a quaternion [a b c d]"""
+    (x, y, z) = axis
     a = np.cos(angle/2)
     b = np.sin(angle/2) * x
     c = np.sin(angle/2) * y
@@ -57,7 +56,7 @@ def reading_to_qtrn(reading, prev_sample_time):
     sample_time = sample_time if sample_time>0 else (1/256) # first reading assumes 256Hz
     rot_angle = np.linalg.norm(reading[1:]) * sample_time
     rot_axis = np.repeat(1/np.linalg.norm(reading[1:]),3) * reading[1:]
-    return euler_to_qtrn(np.append(rot_axis,rot_angle))
+    return euler_to_qtrn(rot_axis, rot_angle)
 
 def qtrn_to_euler(qtrn):
     """converts a numpy quaternion array [a b c d] to an euler angle array (axis of rotation followed by the angle rotated by) [x y z theta]"""
@@ -108,13 +107,13 @@ def gyro_dead_reckoning(imu_data):
 
 def gyro_acc_positioning(imu_data):
     """computes current position using data both from the gyroscope and accelerometer"""
-    ALPHA = 0.01
+    ALPHA = 0.0001
     print(">>> Tilt Correction <<<")
     curr_pos = np.array([1,0,0,0], dtype=np.float32)
     print("> Start orientation:",curr_pos)
     gyro_range = range(0,4)
     acc_range = range(4,7)
-    ref_vector = np.array([0., 1., 0.], dtype=np.float32)
+    ref_vector = np.array([0,1,0], dtype=np.float32)
     prev_sample_time = 0.0
     for point in imu_data:
         ### calculate initial position only using the gyro
@@ -122,8 +121,10 @@ def gyro_acc_positioning(imu_data):
         prev_sample_time = point[0]
         curr_pos = qtrn_mult(delta_qtrn, curr_pos)
         ### convert acc data to the global frame
+        # (this is the inverse of the head orientation!)
+        # therefore, we compute q^-1•p•q rather than q•p•q^-1
         acc_qtrn = np.insert(point[acc_range], 0, 0)
-        acc_qtrn = qtrn_mult(qtrn_mult(curr_pos, acc_qtrn), qtrn_conj(curr_pos))
+        acc_qtrn = qtrn_mult(qtrn_mult(qtrn_conj(curr_pos), acc_qtrn), curr_pos)
         ### calculate the tilt error
         # x = index 1, z = index 3 (we disregard the first element, it is not needed for rotating a simple point as we just rotated acc to the global frame)
         tilt_error_axis = np.array([acc_qtrn[3], 0.0, -acc_qtrn[1]])
@@ -133,10 +134,9 @@ def gyro_acc_positioning(imu_data):
         cos_ang = cos_ang if cos_ang < 1 else 1
         tilt_error_angle = np.arccos(cos_ang)
         ### Repair tilt using the comp filter
-        comp_filter = euler_to_qtrn(np.append(tilt_error_axis,-ALPHA*tilt_error_angle))
-        # fix the delta using the corrected acceleration data
+        comp_filter = euler_to_qtrn(tilt_error_axis, -ALPHA*tilt_error_angle)
+        # fix our current estimated position using acceleration data
         curr_pos = qtrn_mult(comp_filter, curr_pos)
-        #print()
     print("> End orientation:",curr_pos)
     print("end check:",np.linalg.norm(curr_pos))
     return curr_pos
@@ -145,59 +145,70 @@ def gyro_acc_positioning(imu_data):
 
 def gyro_acc_mag_positioning(imu_data):
     """corrects for tilt and yaw using the accelerometer and magnetometer"""
-    ALPHA = 0.001
+    ALPHA_ACC = 0.001
+    ALPHA_YAW = 0.001
+
     print(">>> Tilt and Yaw Correction <<<")
     curr_pos = np.array([1,0,0,0], dtype=np.float32)
     print("> Start orientation:",curr_pos)
     gyro_range = range(0,4)
     acc_range = range(4,7)
     mag_range = range(7,10)
-    ref_vector = np.array([0.,1.,0.], dtype=np.float32)
+    ref_vector = np.array([0,1,0], dtype=np.float32)
 
     # take reference measurements for yaw correction
-    m_ref = np.array(imu_data[0,mag_range])
+    m_ref = np.insert(imu_data[0,mag_range], 0, 0)
     print("m_ref:",m_ref)
     # transform m_ref to the global frame
+    # (this is the inverse of the head orientation!)
+    # therefore, we compute q^-1•p•q rather than q•p•q^-1
     m_ref = qtrn_mult(qtrn_mult(qtrn_conj(curr_pos), m_ref), curr_pos)
 
     prev_sample_time = 0.0
     for point in imu_data:
         ### calculate initial position only using the gyro
-        gyro_qtrn = reading_to_qtrn(point[gyro_range], prev_sample_time)
+        delta_qtrn = reading_to_qtrn(point[gyro_range], prev_sample_time)
         prev_sample_time = point[0]
-
-
-        curr_pos = qtrn_mult(curr_pos, gyro_qtrn)
+        curr_pos = qtrn_mult(delta_qtrn, curr_pos)
         ### convert acc data to the global frame
-        acc_qtrn = np.array(point[acc_range])
-        acc_qtrn = qtrn_mult(qtrn_mult(qtrn_conj(gyro_qtrn), acc_qtrn), gyro_qtrn)
+        # (this is the inverse of the head orientation!)
+        # therefore, we compute q^-1•p•q rather than q•p•q^-1
+        acc_qtrn = np.insert(point[acc_range], 0, 0)
+        acc_qtrn = qtrn_mult(qtrn_mult(qtrn_conj(curr_pos), acc_qtrn), curr_pos)
         ### calculate the tilt error
-        # x = index 1, z = index 3 (index 0 is w, which relates to angle, and we don't care about this at the moment)
-        tilt_error_axis = np.array([acc_qtrn[3], 0.0, acc_qtrn[1]])
-        acc_vector = qtrn_to_euler(acc_qtrn)
-        cos_ang = np.dot(ref_vector, acc_vector[:3])
+        # x = index 1, z = index 3 (we disregard the first element, it is not needed for rotating a simple point as we just rotated acc to the global frame)
+        tilt_error_axis = np.array([acc_qtrn[3], 0.0, -acc_qtrn[1]])
+        cos_ang = np.dot(ref_vector, acc_qtrn[1:])
+        # account for any rounding errors
+        cos_ang = cos_ang if cos_ang > -1 else -1
+        cos_ang = cos_ang if cos_ang < 1 else 1
         tilt_error_angle = np.arccos(cos_ang)
         ### Repair tilt using the comp filter
-        comp_filter = euler_to_qtrn(np.append(tilt_error_axis,-ALPHA*tilt_error_angle))
+        comp_filter = euler_to_qtrn(tilt_error_axis, -ALPHA_ACC*tilt_error_angle)
+        # fix our current estimated position using acceleration data
         curr_pos = qtrn_mult(comp_filter, curr_pos)
 
         ### convert mag data to the global frame
-        mag_qtrn = reading_to_qtrn(point[mag_range])
-        mag_qtrn = qtrn_mult(qtrn_mult(qtrn_conj(curr_pos), acc_qtrn), curr_pos)
+        # (this is the inverse of the head orientation!)
+        # therefore, we compute q^-1•p•q rather than q•p•q^-1
+        mag_qtrn = np.insert(point[mag_range], 0, 0)
+        mag_qtrn = qtrn_mult(qtrn_mult(qtrn_conj(curr_pos), mag_qtrn), curr_pos)
         # calculate yaw difference
+        # x = index 1, z = index 3 (first element is just 0, which we don't care about - it was only used to make up the length for a quaternion)
         yaw_angle_meas = np.arctan2(mag_qtrn[1], mag_qtrn[3])
         yaw_angle_real = np.arctan2(m_ref[1], m_ref[3])
         yaw_diff = yaw_angle_meas - yaw_angle_real
         # repair yaw drift using complementary filter
-        comp_filter = euler_to_qtrn(np.append([0,1,0],-ALPHA*yaw_diff))
+        tilt_yaw_axis = np.array([0, 1, 0])
+        comp_filter = euler_to_qtrn(tilt_yaw_axis, -ALPHA_YAW*yaw_diff)
         curr_pos = qtrn_mult(comp_filter, curr_pos)
     print("> End orientation:",curr_pos)
+    print("end check:",np.linalg.norm(curr_pos))
     return curr_pos
 
-
 def test():
-    angles = [0.2,1.12,2.31,2.1899]
-    q = euler_to_qtrn(angles)
+    axis = [0.2,1.12,2.31]
+    q = euler_to_qtrn(axis, 1.32)
     print("q:",q)
     r = qtrn_to_euler(q)
     print("r:",r)
@@ -211,8 +222,8 @@ def main():
     print()
     end_better = gyro_acc_positioning(imu_data)
     print()
-    #end_best = gyro_acc_mag_positioning(imu_data)
-    #print()
+    end_best = gyro_acc_mag_positioning(imu_data)
+    print()
 
 if __name__=="__main__":
     main()
