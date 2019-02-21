@@ -59,15 +59,15 @@ def reading_to_qtrn(reading, prev_sample_time):
     return euler_to_qtrn(rot_axis, rot_angle)
 
 def qtrn_to_euler(qtrn):
-    """converts a numpy quaternion array [a b c d] to an euler angle array (axis of rotation followed by the angle rotated by) [x y z theta]"""
+    """converts a numpy quaternion array [a b c d] to an euler angle array (axis of rotation followed by the angle rotated by) ([x y z], theta)"""
     (a, b, c, d) = qtrn
     angle = 2 * np.arccos(a)
     if angle==0.0:
         # identity quaternion/rotation (= no rotation)
-        return np.array([1, 0, 0, 0])
+        return (np.array([1, 0, 0]), 0)
     divisor = 1/np.sqrt(1-(a**2))
     x, y, z = b/divisor, c/divisor, d/divisor
-    return np.array([x, y, z, angle])
+    return (np.array([x, y, z]), angle)
 
 def qtrn_conj(qtrn):
     """computes the conjugate of a quaternion, passed as a numpy array [a b c d]"""
@@ -107,7 +107,8 @@ def gyro_dead_reckoning(imu_data):
 
 def gyro_acc_positioning(imu_data):
     """computes current position using data both from the gyroscope and accelerometer"""
-    ALPHA = 0.0001
+    ALPHA_ACC = 0.0001
+
     print(">>> Tilt Correction <<<")
     curr_pos = np.array([1,0,0,0], dtype=np.float32)
     print("> Start orientation:",curr_pos)
@@ -134,7 +135,7 @@ def gyro_acc_positioning(imu_data):
         cos_ang = cos_ang if cos_ang < 1 else 1
         tilt_error_angle = np.arccos(cos_ang)
         ### Repair tilt using the comp filter
-        comp_filter = euler_to_qtrn(tilt_error_axis, -ALPHA*tilt_error_angle)
+        comp_filter = euler_to_qtrn(tilt_error_axis, -ALPHA_ACC*tilt_error_angle)
         # fix our current estimated position using acceleration data
         curr_pos = qtrn_mult(comp_filter, curr_pos)
     print("> End orientation:",curr_pos)
