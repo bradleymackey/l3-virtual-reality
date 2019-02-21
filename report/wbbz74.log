@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018) (preloaded format=pdflatex 2018.7.26)  21 FEB 2019 14:52
+This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018) (preloaded format=pdflatex 2018.7.26)  21 FEB 2019 17:10
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -662,29 +662,51 @@ LaTeX Font Info:    Try loading font information for U+msb on input line 31.
 
 (/usr/local/texlive/2018/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
-) [1
+)
+<./images/gyro-unaltered.png, id=4, 462.528pt x 346.896pt>
+File: ./images/gyro-unaltered.png Graphic file (type png)
+<use ./images/gyro-unaltered.png>
+Package pdftex.def Info: ./images/gyro-unaltered.png  used on input line 52.
+(pdftex.def)             Requested size: 168.82631pt x 126.61862pt.
+<./images/acc-unaltered.png, id=6, 462.528pt x 346.896pt>
+File: ./images/acc-unaltered.png Graphic file (type png)
+<use ./images/acc-unaltered.png>
+Package pdftex.def Info: ./images/acc-unaltered.png  used on input line 53.
+(pdftex.def)             Requested size: 168.82631pt x 126.61862pt.
+<./images/mag-unaltered.png, id=7, 462.528pt x 346.896pt>
+File: ./images/mag-unaltered.png Graphic file (type png)
+<use ./images/mag-unaltered.png>
+Package pdftex.def Info: ./images/mag-unaltered.png  used on input line 54.
+(pdftex.def)             Requested size: 168.82631pt x 126.61862pt.
+ [1
 
-{/usr/local/texlive/2018/texmf-var/fonts/map/pdftex/updmap/pdftex.map}] (./wbbz
-74.aux) ) 
+{/usr/local/texlive/2018/texmf-var/fonts/map/pdftex/updmap/pdftex.map} <./image
+s/gyro-unaltered.png> <./images/acc-unaltered.png> <./images/mag-unaltered.png>
+]
+(./wbbz74.aux)
+
+LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
+
+ ) 
 Here is how much of TeX's memory you used:
- 15773 strings out of 492649
- 321568 string characters out of 6129622
- 373772 words of memory out of 5000000
- 19345 multiletter control sequences out of 15000+600000
- 14902 words of font info for 55 fonts, out of 8000000 for 9000
+ 15795 strings out of 492649
+ 322090 string characters out of 6129622
+ 374780 words of memory out of 5000000
+ 19362 multiletter control sequences out of 15000+600000
+ 15210 words of font info for 56 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 62i,6n,65p,858b,201s stack positions out of 5000i,500n,10000p,200000b,80000s
-</usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmb
-x12.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi
-10.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10
-.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.p
-fb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pf
-b></usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb
->
-Output written on wbbz74.pdf (1 page, 69260 bytes).
+ 62i,6n,65p,858b,346s stack positions out of 5000i,500n,10000p,200000b,80000s
+</usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb
+></usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb>
+</usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb><
+/usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></u
+sr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr
+/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/
+local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb>
+Output written on wbbz74.pdf (1 page, 207116 bytes).
 PDF statistics:
- 35 PDF objects out of 1000 (max. 8388607)
- 25 compressed objects within 1 object stream
+ 46 PDF objects out of 1000 (max. 8388607)
+ 29 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
- 13 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 28 words of extra memory for PDF output out of 10000 (max. 10000000)
 
