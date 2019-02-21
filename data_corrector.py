@@ -65,8 +65,8 @@ def qtrn_to_euler(qtrn):
     """converts a numpy quaternion array [a b c d] to an euler angle array (axis of rotation followed by the angle rotated by) [x y z theta]"""
     (a, b, c, d) = qtrn
     angle = 2 * np.arccos(a)
-    if angle==0:
-        # angle is 0? identity quaternion/rotation (= no rotation)
+    if angle==0.0:
+        # identity quaternion/rotation (= no rotation)
         return np.array([1, 0, 0, 0])
     divisor = 1/np.sqrt(1-(a**2))
     x, y, z = b/divisor, c/divisor, d/divisor
@@ -77,10 +77,10 @@ def qtrn_conj(qtrn):
     (a, b, c, d) = qtrn
     return np.array([a, -b, -c, -d])
 
-def qtrn_mult(qtrn_a, qtrn_b):
+def qtrn_mult(qtrn_1, qtrn_2):
     """computes the product of 2 quaternions, each [a b c d]"""
-    (a_1, b_1, c_1, d_1) = qtrn_a
-    (a_2, b_2, c_2, d_2) = qtrn_b
+    (a_1, b_1, c_1, d_1) = qtrn_1
+    (a_2, b_2, c_2, d_2) = qtrn_2
     a = a_1*a_2 - b_1*b_2 - c_1*c_2 - d_1*d_2
     b = a_1*b_2 + b_1*a_2 + c_1*d_2 - d_1*c_2
     c = a_1*c_2 - b_1*d_2 + c_1*a_2 + d_1*b_2
