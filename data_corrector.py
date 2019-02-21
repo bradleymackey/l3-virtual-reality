@@ -256,7 +256,6 @@ def gyro_acc_mag_positioning(imu_data):
     print("end check:",np.linalg.norm(curr_pos))
     return gyro_data
 
-
 # PROBLEM 5:
 
 def save_unmodified_figs(raw_data):
@@ -273,7 +272,7 @@ def save_unmodified_figs(raw_data):
     plt.clf()
     fig, ax = plt.subplots()
     plt.xlabel("Time (s)")
-    plt.ylabel("Angular Rate (degs^-1)")
+    plt.ylabel("Angular Rate (deg/s)")
     plt.title("Raw Gyroscope Readings")
     ax.plot(time_data, x_data, 'r-', label="X")
     ax.plot(time_data, y_data, 'g-', label="Y")
@@ -293,7 +292,7 @@ def save_unmodified_figs(raw_data):
     plt.clf()
     fig, ax = plt.subplots()
     plt.xlabel("Time (s)")
-    plt.ylabel("Acceleration (ms^2)")
+    plt.ylabel("Acceleration (g)")
     plt.title("Raw Accelerometer Readings")
     ax.plot(time_data, x_data, 'r-', label="X")
     ax.plot(time_data, y_data, 'g-', label="Y")
