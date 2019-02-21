@@ -10,11 +10,13 @@
 import csv
 import numpy as np
 import math
+import matplotlib.mlab as mlab
+import matplotlib.pyplot as plt
 
 # PROBLEM 1:
 
-def get_sanitized_imu_data():
-    """retrieves the IMU data from the `IMUData.csv` file"""
+def get_raw_imu_data():
+    """retrieves raw IMU data from the `IMUData.csv` file"""
     print(">>> Data Extraction <<<")
     data = []
     with open('IMUData.csv', 'r') as f:
@@ -24,6 +26,10 @@ def get_sanitized_imu_data():
             data.append(row)
     data = np.array(data, dtype=np.float32)
     print(f"> Successfully retrieved {len(data)} items from IMUData.csv.")
+    return data
+
+def sanitize_imu_data(data):
+    """retrieves the IMU data from the `IMUData.csv` file"""
     for row in range(len(data)):
         # rotational rate to radians
         for col in range(1,4):
@@ -98,6 +104,10 @@ def gyro_dead_reckoning(imu_data):
     start_axis, angle = qtrn_to_euler(curr_pos)
     print("start axis",start_axis,"angle",angle)
     gyro_range = range(0,4)
+
+    # time,x,y,z
+    gyro_data = []
+
     prev_sample_time = 0.0
     for point in imu_data:
 
@@ -107,11 +117,13 @@ def gyro_dead_reckoning(imu_data):
         prev_sample_time = point[0]
         curr_pos = qtrn_mult(delta_qtrn, curr_pos)
 
+        gyro_data.append([prev_sample_time] + curr_pos.tolist())
+
     print("> End orientation:",curr_pos)
     end_axis, angle = qtrn_to_euler(curr_pos)
     print("end axis",end_axis,"angle",angle)
     print("end check:",np.linalg.norm(curr_pos))
-    return curr_pos
+    return gyro_data
 
 # PROBLEM 3:
 
@@ -125,6 +137,12 @@ def gyro_acc_positioning(imu_data):
     gyro_range = range(0,4)
     acc_range = range(4,7)
     ref_vector = np.array([0,1,0], dtype=np.float32)
+    end_axis, angle = qtrn_to_euler(curr_pos)
+    print("start axis",end_axis,"angle",angle)
+
+    # time,x,y,z
+    gyro_data = []
+
     prev_sample_time = 0.0
     for point in imu_data:
 
@@ -153,13 +171,15 @@ def gyro_acc_positioning(imu_data):
         # fix our current estimated position using acceleration data
         curr_pos = qtrn_mult(comp_filter, curr_pos)
 
+        gyro_data.append([prev_sample_time] + curr_pos.tolist())
+
 
     print("> End orientation:",curr_pos)
     end_axis, angle = qtrn_to_euler(curr_pos)
     print("end axis",end_axis,"angle",angle)
 
     print("end check:",np.linalg.norm(curr_pos))
-    return curr_pos
+    return gyro_data
 
 # PROBLEM 4:
 
@@ -182,6 +202,9 @@ def gyro_acc_mag_positioning(imu_data):
     # (this is the inverse of the head orientation!)
     # therefore, we compute q^-1•p•q rather than q•p•q^-1
     m_ref = qtrn_mult(qtrn_mult(qtrn_conj(curr_pos), m_ref), curr_pos)
+
+    # time,x,y,z
+    gyro_data = []
 
     prev_sample_time = 0.0
     for point in imu_data:
@@ -227,9 +250,98 @@ def gyro_acc_mag_positioning(imu_data):
         comp_filter = euler_to_qtrn(tilt_yaw_axis, -ALPHA_YAW*yaw_diff)
         curr_pos = qtrn_mult(comp_filter, curr_pos)
 
+        gyro_data.append([prev_sample_time] + curr_pos.tolist())
+
     print("> End orientation:",curr_pos)
     print("end check:",np.linalg.norm(curr_pos))
-    return curr_pos
+    return gyro_data
+
+
+# PROBLEM 5:
+
+def save_unmodified_figs(raw_data):
+    """saves figures for the unmodified data"""
+    time_data = []
+    x_data = []
+    y_data = []
+    z_data = []
+    for point in raw_data:
+        time_data.append(point[0])
+        x_data.append(point[1])
+        y_data.append(point[2])
+        z_data.append(point[3])
+    plt.clf()
+    fig, ax = plt.subplots()
+    plt.xlabel("Time (s)")
+    plt.ylabel("Angular Rate (degs^-1)")
+    plt.title("Raw Gyroscope Readings")
+    ax.plot(time_data, x_data, 'r-', label="X")
+    ax.plot(time_data, y_data, 'g-', label="Y")
+    ax.plot(time_data, z_data, 'b-', label="Z")
+    legend = ax.legend(loc='upper left', shadow=True, fontsize='small')
+    plt.savefig("gyro-unaltered.png")
+
+    time_data = []
+    x_data = []
+    y_data = []
+    z_data = []
+    for point in raw_data:
+        time_data.append(point[0])
+        x_data.append(point[4])
+        y_data.append(point[5])
+        z_data.append(point[6])
+    plt.clf()
+    fig, ax = plt.subplots()
+    plt.xlabel("Time (s)")
+    plt.ylabel("Acceleration (ms^2)")
+    plt.title("Raw Accelerometer Readings")
+    ax.plot(time_data, x_data, 'r-', label="X")
+    ax.plot(time_data, y_data, 'g-', label="Y")
+    ax.plot(time_data, z_data, 'b-', label="Z")
+    legend = ax.legend(loc='upper left', shadow=True, fontsize='small')
+    plt.savefig("acc-unaltered.png")
+
+    time_data = []
+    x_data = []
+    y_data = []
+    z_data = []
+    for point in raw_data:
+        time_data.append(point[0])
+        x_data.append(point[7])
+        y_data.append(point[8])
+        z_data.append(point[9])
+    plt.clf()
+    fig, ax = plt.subplots()
+    plt.xlabel("Time (s)")
+    plt.ylabel("Magnetic Flux (G)")
+    plt.title("Raw Magnetometer Readings")
+    ax.plot(time_data, x_data, 'r-', label="X")
+    ax.plot(time_data, y_data, 'g-', label="Y")
+    ax.plot(time_data, z_data, 'b-', label="Z")
+    legend = ax.legend(loc='upper left', shadow=True, fontsize='small')
+    plt.savefig("mag-unaltered.png")
+
+def save_gyro_fig(name, title, data):
+    """saves gyro data for a given filename and data"""
+    time_data = []
+    x_data = []
+    y_data = []
+    z_data = []
+    for point in data:
+        time_data.append(point[0])
+        x_data.append(point[1]/(np.pi/180))
+        y_data.append(point[2]/(np.pi/180))
+        z_data.append(point[3]/(np.pi/180))
+    plt.clf()
+    fig, ax = plt.subplots()
+    plt.xlabel("Time (s)")
+    plt.ylabel("Angular Rate (degs^-1)")
+    plt.title(title)
+    ax.plot(time_data, x_data, 'r-', label="X")
+    ax.plot(time_data, y_data, 'g-', label="Y")
+    ax.plot(time_data, z_data, 'b-', label="Z")
+    legend = ax.legend(loc='lower left', shadow=True, fontsize='small')
+    plt.savefig(f"{name}.png")
 
 def test():
     axis = [0.2,1.12,2.31]
@@ -241,14 +353,18 @@ def test():
 # MAIN:
 def main():
     test()
-    imu_data = get_sanitized_imu_data()
-    print()
-    end_bad = gyro_dead_reckoning(imu_data)
-    print()
-    end_better = gyro_acc_positioning(imu_data)
-    print()
-    end_best = gyro_acc_mag_positioning(imu_data)
-    print()
+    raw_data = get_raw_imu_data()
+    save_unmodified_figs(raw_data)
+    imu_data = sanitize_imu_data(raw_data)
+
+    gyro_data = gyro_dead_reckoning(imu_data)
+    save_gyro_fig("gyro_dead", "Dead-Reckoning (Gyro)", gyro_data)
+
+    acc_data = gyro_acc_positioning(imu_data)
+    save_gyro_fig("gyro_acc", "Tilt Correction (Gyro + Acc)", acc_data)
+    
+    mag_data = gyro_acc_mag_positioning(imu_data)
+    save_gyro_fig("gyro_acc_mag", "Tilt & Yaw Correction (Gyro + Acc + Mag)", mag_data)
 
 if __name__=="__main__":
     main()
