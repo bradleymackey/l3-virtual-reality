@@ -96,8 +96,9 @@ def gyro_dead_reckoning(imu_data):
     gyro_range = range(0,4)
     prev_sample_time = 0.0
     for point in imu_data:
-        
-        ### COMPUTE NEW POSITION
+
+        ### UPDATE POSITION
+        # update the position using the gyroscope
         delta_qtrn = reading_to_qtrn(point[gyro_range], prev_sample_time)
         prev_sample_time = point[0]
         curr_pos = qtrn_mult(delta_qtrn, curr_pos)
@@ -110,7 +111,7 @@ def gyro_dead_reckoning(imu_data):
 
 def gyro_acc_positioning(imu_data):
     """computes current position using data both from the gyroscope and accelerometer"""
-    ALPHA_ACC = 0.0001
+    ALPHA_ACC = 0.001
 
     print(">>> Tilt Correction <<<")
     curr_pos = np.array([1,0,0,0], dtype=np.float32)
@@ -121,7 +122,7 @@ def gyro_acc_positioning(imu_data):
     prev_sample_time = 0.0
     for point in imu_data:
 
-        ### INITIAL POSITION
+        ### UPDATE POSITION
         ### calculate initial position only using the gyro
         delta_qtrn = reading_to_qtrn(point[gyro_range], prev_sample_time)
         prev_sample_time = point[0]
@@ -175,7 +176,7 @@ def gyro_acc_mag_positioning(imu_data):
     prev_sample_time = 0.0
     for point in imu_data:
 
-        ### INITIAL POSITION
+        ### UPDATE POSITION
         ### calculate initial position only using the gyro
         delta_qtrn = reading_to_qtrn(point[gyro_range], prev_sample_time)
         prev_sample_time = point[0]
