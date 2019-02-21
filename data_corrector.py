@@ -67,7 +67,9 @@ def qtrn_to_euler(qtrn):
         return (np.array([1, 0, 0]), 0)
     divisor = 1/np.sqrt(1-(a**2))
     x, y, z = b/divisor, c/divisor, d/divisor
-    return (np.array([x, y, z]), angle)
+    axis = np.array([x, y, z]) 
+    norm_axis = axis / np.sqrt(np.sum(axis**2))
+    return (norm_axis, angle)
 
 def qtrn_conj(qtrn):
     """computes the conjugate of a quaternion, passed as a numpy array [a b c d]"""
@@ -93,6 +95,8 @@ def gyro_dead_reckoning(imu_data):
     curr_pos = np.array([1, 0, 0, 0], dtype=np.float32)
     print(">>> Dead Reckoning (Gyro) <<<")
     print("> Start orientation:",curr_pos)
+    start_axis, angle = qtrn_to_euler(curr_pos)
+    print("start axis",start_axis,"angle",angle)
     gyro_range = range(0,4)
     prev_sample_time = 0.0
     for point in imu_data:
@@ -104,6 +108,8 @@ def gyro_dead_reckoning(imu_data):
         curr_pos = qtrn_mult(delta_qtrn, curr_pos)
 
     print("> End orientation:",curr_pos)
+    end_axis, angle = qtrn_to_euler(curr_pos)
+    print("end axis",end_axis,"angle",angle)
     print("end check:",np.linalg.norm(curr_pos))
     return curr_pos
 
@@ -147,7 +153,11 @@ def gyro_acc_positioning(imu_data):
         # fix our current estimated position using acceleration data
         curr_pos = qtrn_mult(comp_filter, curr_pos)
 
+
     print("> End orientation:",curr_pos)
+    end_axis, angle = qtrn_to_euler(curr_pos)
+    print("end axis",end_axis,"angle",angle)
+
     print("end check:",np.linalg.norm(curr_pos))
     return curr_pos
 
