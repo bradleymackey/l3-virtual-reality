@@ -47,8 +47,8 @@ def sanitize_imu_data(data):
     print("> Successfully normalized data.")
     return data 
 
-def euler_to_qtrn(axis, angle):
-    """converts euler angles (axis-angle repr.) ([x y z], angle) to a quaternion [a b c d]"""
+def axis_angle_to_qtrn(axis, angle):
+    """converts axis-angle repr. ([x y z], angle) to a quaternion [a b c d]"""
     (x, y, z) = axis
     a = np.cos(angle/2)
     b = np.sin(angle/2) * x
@@ -56,13 +56,31 @@ def euler_to_qtrn(axis, angle):
     d = np.sin(angle/2) * z
     return np.array([a, b, c, d])
 
+def euler_to_qtrn(angles):
+    """converts euler angles [x, y, z] to a quaternion"""
+    (x, y, z) = angles
+    c_1 = np.cos(y/2)
+    c_2 = np.cos(x/2)
+    c_3 = np.cos(z/2)
+    s_1 = np.sin(y/2)
+    s_2 = np.sin(x/2)
+    s_3 = np.sin(z/2)
+    c1c2 = c_1*c_2
+    s1s2 = s_1*s_2
+    a = c1c2*c_3 - s1s2*s_3
+    b = c1c2*s_3 + s1s2*c_3
+    c = s_1*c_2*c_3 + c_1*s_2*s_3
+    d = c_1*s_2*c_3 - s_1*c_2*s_3
+    return np.array([a, b, c, d])
+
+
 def reading_to_qtrn(reading, prev_sample_time):
     """converts a numpy euler rotation sample [time x y z] and prev sample time to a quaternion array [a b c d]"""
     sample_time = float(reading[0] - prev_sample_time)
     sample_time = sample_time if sample_time>0 else (1/256) # first reading assumes 256Hz
     rot_angle = np.linalg.norm(reading[1:]) * sample_time
     rot_axis = np.repeat(1/np.linalg.norm(reading[1:]),3) * reading[1:]
-    return euler_to_qtrn(rot_axis, rot_angle)
+    return axis_angle_to_qtrn(rot_axis, rot_angle)
 
 def qtrn_to_euler(qtrn):
     """converts a numpy quaternion array [a b c d] to a raw euler angle array [x y z]"""
@@ -70,7 +88,7 @@ def qtrn_to_euler(qtrn):
     x = np.arcsin(2*b*c + 2*d*a)
     y = np.arctan2(2*c*a-2*b*d, 1 - 2*(c**2) - 2*(d**2))
     z = np.arctan2(2*b*a-2*c*d , 1 - 2*(b**2) - 2*(d**2))
-    return np.array([x,y,z])
+    return np.array([x, y, z])
 
 def qtrn_conj(qtrn):
     """computes the conjugate of a quaternion, passed as a numpy array [a b c d]"""
@@ -126,9 +144,12 @@ def gyro_acc_positioning(imu_data):
     print("> Start orientation:",curr_pos)
     gyro_range = range(0,4)
     acc_range = range(4,7)
-    #ref_vector = np.array([0,1,0], dtype=np.float32)
 
-    # time,x,y,z
+    # z is clearly the up vector based on the raw accelerometer readings
+    up_vec = np.array([0,0,0,1])
+    print("up vec:",up_vec)
+    
+    # [[time,x,y,z]]
     gyro_data = []
 
     prev_sample_time = 0.0
@@ -143,18 +164,24 @@ def gyro_acc_positioning(imu_data):
         ### PITCH/TILT CORRECTION
         ### convert acc data to the global frame
         # (this is the inverse of the head orientation!)
-        # therefore, we compute q^-1•p•q rather than q•p•q^-1
-        acc_qtrn = np.insert(point[acc_range], 0, 0)
-        acc_qtrn = qtrn_mult(qtrn_mult(qtrn_conj(curr_pos), acc_qtrn), curr_pos)
+        # therefore, we compute q^{-1}•p•q rather than q•p•q^{-1}
+        #first_acc = qtrn_mult(qtrn_mult(qtrn_conj(curr_pos), first_acc), curr_pos)
+        acc_qtrn = np.insert(point[acc_range], 0, 0)# - first_acc
+        acc_qtrn = qtrn_mult(qtrn_mult(curr_pos, acc_qtrn), qtrn_conj(curr_pos))
+        acc_vec = acc_qtrn[1:]
+        
+        #up_vec = qtrn_mult(qtrn_mult(qtrn_conj(curr_pos), up_vec), curr_pos)
         ### calculate the tilt error
-        # x = index 1, z = index 3 (we disregard the first element, it is not needed for rotating a simple point as we just rotated acc to the global frame)
-        tilt_error_axis = np.array([acc_qtrn[3], 0.0, -acc_qtrn[1]])
-        cos_ang = np.dot(np.array([0,1,0]), acc_qtrn[1:])
+        # x = index 0, z = index 2
+        tilt_error_axis = np.array([acc_vec[2], 0.0, -acc_vec[0]])
+        cos_ang = np.dot(up_vec[1:], acc_vec)
+        # manage rounding errors, there should only be little deviation here
         cos_ang = cos_ang if cos_ang > -1 else -1
-        cos_ang = cos_ang if cos_ang < 1 else 1
+        cos_ang = cos_ang if cos_ang < +1 else +1
         tilt_error_angle = np.arccos(cos_ang)
+        print("error angle:",tilt_error_angle)
         ### Repair tilt using the comp filter
-        comp_filter = euler_to_qtrn(tilt_error_axis, -ALPHA_ACC*tilt_error_angle)
+        comp_filter = axis_angle_to_qtrn(tilt_error_axis, ALPHA_ACC*tilt_error_angle)
         # fix our current estimated position using acceleration data
         curr_pos = qtrn_mult(curr_pos, comp_filter)
 
@@ -214,7 +241,7 @@ def gyro_acc_mag_positioning(imu_data):
         cos_ang = cos_ang if cos_ang < 1 else 1
         tilt_error_angle = np.arccos(cos_ang)
         ### Repair tilt using the comp filter
-        comp_filter = euler_to_qtrn(tilt_error_axis, -ALPHA_ACC*tilt_error_angle)
+        comp_filter = axis_angle_to_qtrn(tilt_error_axis, -ALPHA_ACC*tilt_error_angle)
         # fix our current estimated position using acceleration data
         curr_pos = qtrn_mult(comp_filter, curr_pos)
 
@@ -231,7 +258,7 @@ def gyro_acc_mag_positioning(imu_data):
         yaw_diff = yaw_angle_meas - yaw_angle_real
         # repair yaw drift using complementary filter
         tilt_yaw_axis = np.array([0, 1, 0])
-        comp_filter = euler_to_qtrn(tilt_yaw_axis, -ALPHA_YAW*yaw_diff)
+        comp_filter = axis_angle_to_qtrn(tilt_yaw_axis, -ALPHA_YAW*yaw_diff)
         curr_pos = qtrn_mult(comp_filter, curr_pos)
 
         gyro_data.append([prev_sample_time] + curr_pos.tolist())
@@ -312,7 +339,8 @@ def save_gyro_fig(name, title, data):
     z_data = []
     for point in data:
         time_data.append(point[0])
-        x, y, z = qtrn_to_euler(point[1:])
+        # convert the rotation quaternion to euler angles
+        x, y, z = qtrn_to_euler(point[1:5])
         x_data.append(x/(np.pi/180))
         y_data.append(y/(np.pi/180))
         z_data.append(z/(np.pi/180))
@@ -341,10 +369,10 @@ def main():
     save_unmodified_figs(raw_data)
     imu_data = sanitize_imu_data(raw_data)
 
-    gyro_data = gyro_dead_reckoning(imu_data)
+    gyro_data = gyro_dead_reckoning(np.array(imu_data, copy=True))
     save_gyro_fig("gyro_dead", "Dead-Reckoning (Gyro)", gyro_data)
 
-    acc_data = gyro_acc_positioning(imu_data)
+    acc_data = gyro_acc_positioning(np.array(imu_data, copy=True))
     save_gyro_fig("gyro_acc", "Tilt Correction (Gyro + Acc)", acc_data)
     
     mag_data = gyro_acc_mag_positioning(imu_data)
