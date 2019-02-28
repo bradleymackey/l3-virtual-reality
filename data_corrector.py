@@ -82,6 +82,7 @@ def reading_to_qtrn(reading, prev_sample_time):
     rot_axis = np.repeat(1/np.linalg.norm(reading[1:]),3) * reading[1:]
     return axis_angle_to_qtrn(rot_axis, rot_angle)
 
+
 def qtrn_to_euler(qtrn):
     """converts a numpy quaternion array [a b c d] to a raw euler angle array [x y z]"""
     (a, b, c, d) = qtrn
@@ -125,7 +126,7 @@ def gyro_dead_reckoning(imu_data):
         # update the position using the gyroscope
         delta_qtrn = reading_to_qtrn(point[gyro_range], prev_sample_time)
         prev_sample_time = point[0]
-        curr_pos = qtrn_mult(curr_pos, delta_qtrn)
+        curr_pos = qtrn_mult(delta_qtrn, curr_pos)
 
         gyro_data.append([prev_sample_time] + curr_pos.tolist())
 
@@ -146,7 +147,7 @@ def gyro_acc_positioning(imu_data):
     acc_range = range(4,7)
 
     # z is clearly the up vector based on the raw accelerometer readings
-    up_vec = np.array([0,0,0,1])
+    up_vec = np.array([0,0,1])
     print("up vec:",up_vec)
     
     # [[time,x,y,z]]
@@ -159,36 +160,30 @@ def gyro_acc_positioning(imu_data):
         ### calculate initial position only using the gyro
         delta_qtrn = reading_to_qtrn(point[gyro_range], prev_sample_time)
         prev_sample_time = point[0]
-        curr_pos = qtrn_mult(curr_pos, delta_qtrn)
+        curr_pos = qtrn_mult(delta_qtrn, curr_pos)
 
         ### PITCH/TILT CORRECTION
         ### convert acc data to the global frame
-        # (this is the inverse of the head orientation!)
-        # therefore, we compute q^{-1}•p•q rather than q•p•q^{-1}
-        #first_acc = qtrn_mult(qtrn_mult(qtrn_conj(curr_pos), first_acc), curr_pos)
-        acc_qtrn = np.insert(point[acc_range], 0, 0)# - first_acc
+        acc_qtrn = np.insert(point[acc_range], 0, 0)
         acc_qtrn = qtrn_mult(qtrn_mult(curr_pos, acc_qtrn), qtrn_conj(curr_pos))
         acc_vec = acc_qtrn[1:]
-        
-        #up_vec = qtrn_mult(qtrn_mult(qtrn_conj(curr_pos), up_vec), curr_pos)
         ### calculate the tilt error
         # x = index 0, z = index 2
         tilt_error_axis = np.array([acc_vec[2], 0.0, -acc_vec[0]])
-        cos_ang = np.dot(up_vec[1:], acc_vec)
+        cos_ang = np.dot(up_vec, acc_vec)
         # manage rounding errors, there should only be little deviation here
         cos_ang = cos_ang if cos_ang > -1 else -1
         cos_ang = cos_ang if cos_ang < +1 else +1
         tilt_error_angle = np.arccos(cos_ang)
         print("error angle:",tilt_error_angle)
         ### Repair tilt using the comp filter
-        comp_filter = axis_angle_to_qtrn(tilt_error_axis, ALPHA_ACC*tilt_error_angle)
+        comp_filter = axis_angle_to_qtrn(tilt_error_axis, -ALPHA_ACC*tilt_error_angle)
         # fix our current estimated position using acceleration data
-        curr_pos = qtrn_mult(curr_pos, comp_filter)
+        curr_pos = qtrn_mult(comp_filter, curr_pos)
 
         gyro_data.append([prev_sample_time] + curr_pos.tolist())
 
     print("> End orientation:",curr_pos)
-
     print("end check:",np.linalg.norm(curr_pos))
     return gyro_data
 
@@ -205,6 +200,7 @@ def gyro_acc_mag_positioning(imu_data):
     gyro_range = range(0,4)
     acc_range = range(4,7)
     mag_range = range(7,10)
+
     ref_vector = np.array([0,1,0], dtype=np.float32)
 
     # take reference measurement for yaw correction
