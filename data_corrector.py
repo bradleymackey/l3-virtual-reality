@@ -165,13 +165,20 @@ def gyro_acc_positioning(imu_data):
         ### PITCH/TILT CORRECTION
         ### convert acc data to the global frame
         acc_qtrn = np.insert(point[acc_range], 0, 0)
-        acc_qtrn = qtrn_mult(qtrn_mult(curr_pos, acc_qtrn), qtrn_conj(curr_pos))
+        inv_curr = qtrn_conj(curr_pos) / np.repeat(np.linalg.norm(curr_pos)**2,4)
+        print("inv curr", inv_curr)
+        acc_qtrn = qtrn_mult(qtrn_mult(curr_pos, acc_qtrn), inv_curr)
         acc_vec = acc_qtrn[1:]
+        acc_vec = np.repeat(1/np.linalg.norm(acc_vec),3) * acc_vec
+
+        print("acc world", acc_vec)
         ### calculate the tilt error
         # x = index 0, z = index 2
-        tilt_error_axis = np.array([acc_vec[2], 0.0, -acc_vec[0]])
+        x, z = acc_vec[0], acc_vec[2]
+        tilt_error_axis = np.array([z, 0.0, -x])
+        tilt_error_axis = np.repeat(1/np.linalg.norm(tilt_error_axis),3) * tilt_error_axis
         cos_ang = np.dot(up_vec, acc_vec)
-        # manage rounding errors, there should only be little deviation here
+        # possible rounding errors
         cos_ang = cos_ang if cos_ang > -1 else -1
         cos_ang = cos_ang if cos_ang < +1 else +1
         tilt_error_angle = np.arccos(cos_ang)
