@@ -173,9 +173,8 @@ def gyro_acc_positioning(imu_data):
 
         print("acc world", acc_vec)
         ### calculate the tilt error
-        # x = index 0, z = index 2
-        x, z = acc_vec[0], acc_vec[2]
-        tilt_error_axis = np.array([z, 0.0, -x])
+        x, y = acc_vec[0], acc_vec[1]
+        tilt_error_axis = np.array([-y, x, 0])
         tilt_error_axis = np.repeat(1/np.linalg.norm(tilt_error_axis),3) * tilt_error_axis
         cos_ang = np.dot(up_vec, acc_vec)
         # possible rounding errors
