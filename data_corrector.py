@@ -138,7 +138,7 @@ def gyro_dead_reckoning(imu_data):
 
 def gyro_acc_positioning(imu_data):
     """computes current position using data both from the gyroscope and accelerometer"""
-    ALPHA_ACC = 1
+    ALPHA_ACC = 0.01
 
     print(">>> Tilt Correction <<<")
     curr_pos = np.array([1,0,0,0], dtype=np.float32)
@@ -177,7 +177,7 @@ def gyro_acc_positioning(imu_data):
         cos_ang = cos_ang if cos_ang > -1 else -1
         cos_ang = cos_ang if cos_ang < +1 else +1
         tilt_error_angle = np.arccos(cos_ang)
-        print("error angle:",tilt_error_angle)
+        #print("error angle:",tilt_error_angle)
         ### Repair tilt using the comp filter
         comp_filter = axis_angle_to_qtrn(tilt_error_axis, -ALPHA_ACC*tilt_error_angle)
         # fix our current estimated position using acceleration data
@@ -195,7 +195,7 @@ def gyro_acc_positioning(imu_data):
 def gyro_acc_mag_positioning(imu_data):
     """corrects for tilt and yaw using the accelerometer and magnetometer"""
     ALPHA_ACC = 0.1
-    ALPHA_YAW = 1
+    ALPHA_YAW = 0.0001
 
     print(">>> Tilt and Yaw Correction <<<")
     curr_pos = np.array([1,0,0,0], dtype=np.float32)
@@ -252,7 +252,8 @@ def gyro_acc_mag_positioning(imu_data):
         mag_qtrn = np.insert(point[mag_range], 0, 0)
         mag_qtrn = qtrn_mult(qtrn_mult(curr_pos, mag_qtrn), qtrn_conj(curr_pos))
         # calculate yaw difference
-        # z is the up axis, so that is what we yaw around
+        # z is the up axis, so that is what we yaw around (angle around z was not corrected during tilt correction) 
+        # - in our XYZ representation though, WE still see X as the tilt on the graph so the fact that this yaw correction is not applied around the Z axis until this point explains why X drifts in the tilt correction!
         meas_x, meas_y = mag_qtrn[1], mag_qtrn[2]
         yaw_angle_meas = np.arctan2(meas_y, meas_x)
         real_x, real_y = m_ref[1], m_ref[2]
@@ -292,6 +293,7 @@ def save_unmodified_figs(raw_data):
     ax.plot(time_data, y_data, 'g-', label="Y")
     ax.plot(time_data, z_data, 'b-', label="Z")
     legend = ax.legend(loc='upper left', shadow=True, fontsize='small')
+    plt.grid()
     plt.savefig("gyro-unaltered.png")
 
     time_data = []
@@ -312,6 +314,7 @@ def save_unmodified_figs(raw_data):
     ax.plot(time_data, y_data, 'g-', label="Y")
     ax.plot(time_data, z_data, 'b-', label="Z")
     legend = ax.legend(loc='upper left', shadow=True, fontsize='small')
+    plt.grid()
     plt.savefig("acc-unaltered.png")
 
     time_data = []
@@ -332,6 +335,7 @@ def save_unmodified_figs(raw_data):
     ax.plot(time_data, y_data, 'g-', label="Y")
     ax.plot(time_data, z_data, 'b-', label="Z")
     legend = ax.legend(loc='upper left', shadow=True, fontsize='small')
+    plt.grid()
     plt.savefig("mag-unaltered.png")
 
 def save_gyro_fig(name, title, data):
@@ -359,12 +363,10 @@ def save_gyro_fig(name, title, data):
     legend = ax.legend(loc='lower left', shadow=True, fontsize='small')
     plt.savefig(f"{name}.png")
 
-def test():
-    axis = [0.2,1.12,2.31]
-    q = euler_to_qtrn(axis, 1.32)
-    print("q:",q)
-    r = qtrn_to_euler(q)
-    print("r:",r)
+def animated_3d_plot(data):
+    """produces a 3d animated plot of the given imu data"""
+    pass
+
 
 # MAIN:
 def main():

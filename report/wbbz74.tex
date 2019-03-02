@@ -13,6 +13,7 @@
 \usepackage[font=small,labelfont=bf]{caption} % Required for specifying captions to tables and figures
 \usepackage{pgfgantt} % gantt chart!
 \usepackage{titling}
+\usepackage{gensymb}
 \usepackage{setspace}
 \renewcommand{\baselinestretch}{1.2} 
 
@@ -49,10 +50,28 @@
 
 % QUESTION 3: Try a few different alpha values (e.g., 0.01, 0.1, ...), investigate and comment on their effect on drift compensation in your report (7 marks)
 
-\item For the smallest values of $\alpha$ ($<0.001$), very little drift correction is applied and the headset is able to maintain smooth, albeit slightly misaligned motion after correction. For high values of $\alpha$ (0.1--1), after around 20 seconds I noticed the Euler angle around the x-axis begins to drift. This is due to the fact that as the IMU is drift corrected, drift correction rotation occurs around the x-y plane only (as z is the `up' axis). This causes 
+\item 
+
+For the smallest values of $\alpha_{tilt}$ ($<0.001$), very little drift correction is applied and the headset is able to maintain smooth, albeit slightly misaligned motion after correction. 
+For high values of $\alpha_{tilt}$ (0.1--1), after around 20 seconds I noticed the Euler angle around the $x$-axis begins to drift by around $-25\degree$ towards the end of the readings. 
+This is due to the fact that as the IMU is drift corrected, drift correction rotation occurs around the $x$-$y$ plane only (as $z$ is the `up' axis, pointing upwards initially according to the accelerometer, shown in Figure \ref{fig:raw-readings}). 
+As such, a yaw motion around the $z$-axis is represented by the $x$ (or $\theta$) Euler angle here. 
+The action of correcting the tilt can slightly induce a drift into this angle, so high values of $\alpha_{tilt}$ are not preferable, as this effect becomes more exaggerated.
+Additionally, high values of $\alpha_{tilt}$ can cause very noisy positional readings as each movement is precisely drift corrected.
+This would cause a very unpleasant viewing experience for a VR user as the viewport abruptly snaps back to a correct position with each IMU reading.
+I found that an $\alpha_{tilt}$ value of around 0.01 resulted in good drift correction without the large amount of noise caused by correction. This is visible in Figure \ref{fig:euler-angles}.
+A reduction in the noise could be reduced by taking the average position of the `up vector' over a number of samples in proximity.
+
+% QUESTION 4: Try a few different alpha values (e.g., 0.01, 0.1, ...), investigate and comment on their effect on drift compensation in your report (5 marks).
+
+\item 
+Yaw correction effects the Euler angle around the $x$-axis ($\theta$ angle) because of the initial mounted positioning of the IMU, explained above.
+I found that all values of $\alpha_{yaw}$ greater than 0.0001 were able to correct drift induced into the $\theta$ angle by the tilt correction and, as such, I found that $\alpha_{tilt}=0.1$ allowed a for more stable output in the other two axes.
+Increasing the value from this point all the way up to $\alpha_{yaw}=1$ maintained the positioning of the drift correction of the $x$-axis, but induced more noise into the Euler angle. 
+Therefore, the best angles for the combined tilt and yaw correction I found were $\alpha_{tilt}=0.1$ and $\alpha_{yaw}=0.0001$.
+The result of this correction can also been seen in Figure \ref{fig:euler-angles}.
 
 
-\item Try a few different alpha values (e.g., 0.01, 0.1, ...), investigate and comment on their effect on drift compensation in your report (5 marks).
 \end{enumerate}
 
 \section*{Visualisations}
@@ -65,7 +84,7 @@
 \includegraphics[width=.32\textwidth]{mag-unaltered}
 
 \caption{Raw sensor readings from the IMU.}
-\label{fig:figure3}
+\label{fig:raw-readings}
 
 \end{figure}
 
@@ -76,8 +95,8 @@
 \includegraphics[width=.32\textwidth]{2gyro_acc}\hfill
 \includegraphics[width=.32\textwidth]{3gyro_acc_mag}
 
-\caption{Euler angle readings, with and without various levels of correction. }
-\label{fig:figure3}
+\caption{Euler angle readings, with and without various levels of correction. For tilt correction, $\alpha_{tilt}=0.01$. For tilt \& yaw correction, $\alpha_{tilt}=0.1$, $\alpha_{yaw}=0.001$.}
+\label{fig:euler-angles}
 
 \end{figure}
 
