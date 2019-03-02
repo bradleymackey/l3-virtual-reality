@@ -12,6 +12,8 @@ import numpy as np
 import math
 import matplotlib.mlab as mlab
 import matplotlib.pyplot as plt
+import mpl_toolkits.mplot3d.axes3d as p3
+import matplotlib.animation as animation
 
 # PROBLEM 1:
 
@@ -365,11 +367,44 @@ def save_gyro_fig(name, title, data):
 
 def animated_3d_plot(data):
     """produces a 3d animated plot of the given imu data"""
-    pass
+    plt.clf()
+    origin = np.array([0,0,0])
+    soa = np.array([[0, 0, 0, 1, 0, 0], [0, 0, 0, 0, 1, 0], [0, 0, 0, 0, 0, 1]])
+    red = (1,0,0)
+    green = (0,1,0)
+    blue = (0,0,1)
+    colors = [red, green, blue, red, red, green, green, blue, blue]
+
+    X, Y, Z, U, V, W = zip(*soa)
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    ax.quiver(X, Y, Z, U, V, W, colors=colors)
+
+    current_position = 0
+
+    def update_position():
+        soa = 
+
+
+    ax.set_title("Dead Reckoning")
+    
+    ax.set_xlim([-1, 1])
+    ax.set_xlabel('X')
+    ax.set_ylim([-1, 1])
+    ax.set_ylabel('Y')
+    ax.set_zlim([-1, 1])
+    ax.set_zlabel('Z')
+
+    # # Creating the Animation object
+    move_ani = animation.FuncAnimation(fig, update_lines, 25, fargs=(data, lines),
+                                    interval=50, blit=False)
+
+
 
 
 # MAIN:
 def main():
+    animated_3d_plot(None)
     #test()
     raw_data = get_raw_imu_data()
     save_unmodified_figs(raw_data)

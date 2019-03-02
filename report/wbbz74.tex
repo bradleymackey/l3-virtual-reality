@@ -1,7 +1,7 @@
 \documentclass[11pt]{article}
 
 % Make margins smaller
-\usepackage[top=0.65in, bottom=0.65in, left=0.6in, right=0.6in]{geometry}
+\usepackage[top=1in, bottom=1in, left=1in, right=1in]{geometry}
 % more advanced mathematical symbols
 \usepackage{amsfonts}
 \usepackage{amssymb}
@@ -40,8 +40,8 @@
 \item 
 \texttt{get\_raw\_imu\_data()} returns the raw data readings from the \texttt{.csv} file (given that it is located in the same directory), returning a 2D array of data rows.\\
 \texttt{sanitize\_imu\_data(data)} cleans the data as specified, returning a 2D array of rows of the modified data.\\
-\texttt{euler\_to\_qtrn(euler)} computes a quaternion $(a,b,c,d)$ from a given array of Euler angles $(x,y,z)$.\\
-\texttt{qtrn\_to\_euler(qtrn)} computes the Euler angles $(x,y,z)$ for a given quaternion representation $(a,b,c,d)$.\\
+\texttt{euler\_to\_qtrn(euler)} computes a quaternion $(a,b,c,d)$ from a given array of Euler angles $(\theta,\psi,\phi)$, the rotations around the $x$, $y$ and $z$ axes respectively.\\
+\texttt{qtrn\_to\_euler(qtrn)} computes the Euler angles $(\theta,\psi,\phi)$ for a given quaternion representation $(a,b,c,d)$.\\
 \texttt{qtrn\_conj(qtrn)} takes a quaternion $(a,b,c,d)$ and returns its conjugate, $(a,-b,-c,-d)$.\\
 \texttt{qtrn\_mult(qtrn\_1, qtrn\_2)} computes the product of 2 quaternions, returning this product $(a,b,c,d)$.
 
@@ -95,7 +95,7 @@ The result of this correction can also been seen in Figure \ref{fig:euler-angles
 \includegraphics[width=.32\textwidth]{2gyro_acc}\hfill
 \includegraphics[width=.32\textwidth]{3gyro_acc_mag}
 
-\caption{Euler angle readings, with and without various levels of correction. For tilt correction, $\alpha_{tilt}=0.01$. For tilt \& yaw correction, $\alpha_{tilt}=0.1$, $\alpha_{yaw}=0.001$.}
+\caption{Euler angle readings, with and without various levels of correction. For tilt correction, $\alpha_{tilt}=0.01$. For tilt \& yaw correction, $\alpha_{tilt}=0.1$, $\alpha_{yaw}=0.001$. Notice the clear improvements and reduction in axis drift as more levels of error correction are added to the raw dead reckoning data.}
 \label{fig:euler-angles}
 
 \end{figure}

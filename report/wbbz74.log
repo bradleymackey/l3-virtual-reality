@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018) (preloaded format=pdflatex 2018.7.26)  2 MAR 2019 15:18
+This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018) (preloaded format=pdflatex 2018.7.26)  2 MAR 2019 19:15
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -564,15 +564,15 @@ LaTeX Font Info:    ... okay on input line 29.
 * layout: <same size as paper>
 * layoutoffset:(h,v)=(0.0pt,0.0pt)
 * modes: 
-* h-part:(L,W,R)=(43.36243pt, 527.57014pt, 43.36243pt)
-* v-part:(T,H,B)=(46.97505pt, 701.01988pt, 46.97505pt)
+* h-part:(L,W,R)=(72.26999pt, 469.75502pt, 72.26999pt)
+* v-part:(T,H,B)=(72.26999pt, 650.43001pt, 72.26999pt)
 * \paperwidth=614.295pt
 * \paperheight=794.96999pt
-* \textwidth=527.57014pt
-* \textheight=701.01988pt
-* \oddsidemargin=-28.90756pt
-* \evensidemargin=-28.90756pt
-* \topmargin=-62.29494pt
+* \textwidth=469.75502pt
+* \textheight=650.43001pt
+* \oddsidemargin=0.0pt
+* \evensidemargin=0.0pt
+* \topmargin=-37.0pt
 * \headheight=12.0pt
 * \headsep=25.0pt
 * \topskip=11.0pt
@@ -679,52 +679,51 @@ LaTeX Font Info:    Try loading font information for U+msb on input line 34.
 
 (/usr/local/texlive/2018/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
-)
-<./images/gyro-unaltered.png, id=4, 462.528pt x 346.896pt>
+) [1
+
+{/usr/local/texlive/2018/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]
+<./images/gyro-unaltered.png, id=17, 462.528pt x 346.896pt>
 File: ./images/gyro-unaltered.png Graphic file (type png)
 <use ./images/gyro-unaltered.png>
-Package pdftex.def Info: ./images/gyro-unaltered.png  used on input line 84.
-(pdftex.def)             Requested size: 168.82631pt x 126.61862pt.
-<./images/acc-unaltered.png, id=6, 462.528pt x 346.896pt>
+Package pdftex.def Info: ./images/gyro-unaltered.png  used on input line 82.
+(pdftex.def)             Requested size: 150.32504pt x 112.74515pt.
+<./images/acc-unaltered.png, id=19, 462.528pt x 346.896pt>
 File: ./images/acc-unaltered.png Graphic file (type png)
 <use ./images/acc-unaltered.png>
-Package pdftex.def Info: ./images/acc-unaltered.png  used on input line 85.
-(pdftex.def)             Requested size: 168.82631pt x 126.61862pt.
-<./images/mag-unaltered.png, id=7, 462.528pt x 346.896pt>
+Package pdftex.def Info: ./images/acc-unaltered.png  used on input line 83.
+(pdftex.def)             Requested size: 150.32504pt x 112.74515pt.
+<./images/mag-unaltered.png, id=20, 462.528pt x 346.896pt>
 File: ./images/mag-unaltered.png Graphic file (type png)
 <use ./images/mag-unaltered.png>
-Package pdftex.def Info: ./images/mag-unaltered.png  used on input line 86.
-(pdftex.def)             Requested size: 168.82631pt x 126.61862pt.
-<./images/1gyro_dead.png, id=8, 462.528pt x 346.896pt>
+Package pdftex.def Info: ./images/mag-unaltered.png  used on input line 84.
+(pdftex.def)             Requested size: 150.32504pt x 112.74515pt.
+<./images/1gyro_dead.png, id=21, 462.528pt x 346.896pt>
 File: ./images/1gyro_dead.png Graphic file (type png)
 <use ./images/1gyro_dead.png>
-Package pdftex.def Info: ./images/1gyro_dead.png  used on input line 96.
-(pdftex.def)             Requested size: 168.82631pt x 126.61862pt.
-<./images/2gyro_acc.png, id=9, 462.528pt x 346.896pt>
+Package pdftex.def Info: ./images/1gyro_dead.png  used on input line 94.
+(pdftex.def)             Requested size: 150.32504pt x 112.74515pt.
+<./images/2gyro_acc.png, id=22, 462.528pt x 346.896pt>
 File: ./images/2gyro_acc.png Graphic file (type png)
 <use ./images/2gyro_acc.png>
-Package pdftex.def Info: ./images/2gyro_acc.png  used on input line 97.
-(pdftex.def)             Requested size: 168.82631pt x 126.61862pt.
-<./images/3gyro_acc_mag.png, id=10, 462.528pt x 346.896pt>
+Package pdftex.def Info: ./images/2gyro_acc.png  used on input line 95.
+(pdftex.def)             Requested size: 150.32504pt x 112.74515pt.
+<./images/3gyro_acc_mag.png, id=23, 462.528pt x 346.896pt>
 File: ./images/3gyro_acc_mag.png Graphic file (type png)
 <use ./images/3gyro_acc_mag.png>
-Package pdftex.def Info: ./images/3gyro_acc_mag.png  used on input line 98.
-(pdftex.def)             Requested size: 168.82631pt x 126.61862pt.
- [1
-
-{/usr/local/texlive/2018/texmf-var/fonts/map/pdftex/updmap/pdftex.map}] [2 <./i
-mages/gyro-unaltered.png> <./images/acc-unaltered.png> <./images/mag-unaltered.
-png> <./images/1gyro_dead.png> <./images/2gyro_acc.png> <./images/3gyro_acc_mag
-.png>]
+Package pdftex.def Info: ./images/3gyro_acc_mag.png  used on input line 96.
+(pdftex.def)             Requested size: 150.32504pt x 112.74515pt.
+ [2 <./images/gyro-unaltered.png> <./images/acc-unaltered.png> <./images/mag-un
+altered.png> <./images/1gyro_dead.png> <./images/2gyro_acc.png> <./images/3gyro
+_acc_mag.png>]
 (./wbbz74.aux) ) 
 Here is how much of TeX's memory you used:
  15913 strings out of 492649
  323950 string characters out of 6129622
- 379350 words of memory out of 5000000
+ 378292 words of memory out of 5000000
  19461 multiletter control sequences out of 15000+600000
  19358 words of font info for 72 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 62i,6n,65p,425b,371s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 62i,6n,65p,438b,369s stack positions out of 5000i,500n,10000p,200000b,80000s
 </usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts
 /cm/cmbx10.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/
 cm/cmbx12.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/c
@@ -736,7 +735,7 @@ mmi8.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmr
 pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pf
 b></usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb
 >
-Output written on wbbz74.pdf (2 pages, 358983 bytes).
+Output written on wbbz74.pdf (2 pages, 360042 bytes).
 PDF statistics:
  67 PDF objects out of 1000 (max. 8388607)
  40 compressed objects within 1 object stream
