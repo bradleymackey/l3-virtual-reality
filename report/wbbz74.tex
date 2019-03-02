@@ -49,7 +49,7 @@
 
 % QUESTION 3: Try a few different alpha values (e.g., 0.01, 0.1, ...), investigate and comment on their effect on drift compensation in your report (7 marks)
 
-\item For the smallest values of $\alpha$ ($<0.001$), very little drift correction is applied and the headset is able to maintain smooth, albeit slightly misaligned motion after around 
+\item For the smallest values of $\alpha$ ($<0.001$), very little drift correction is applied and the headset is able to maintain smooth, albeit slightly misaligned motion after correction. For high values of $\alpha$ (0.1--1), after around 20 seconds I noticed the Euler angle around the x-axis begins to drift. This is due to the fact that as the IMU is drift corrected, drift correction rotation occurs around the x-y plane only (as z is the `up' axis). This causes 
 
 
 \item Try a few different alpha values (e.g., 0.01, 0.1, ...), investigate and comment on their effect on drift compensation in your report (5 marks).
@@ -65,6 +65,18 @@
 \includegraphics[width=.32\textwidth]{mag-unaltered}
 
 \caption{Raw sensor readings from the IMU.}
+\label{fig:figure3}
+
+\end{figure}
+
+\begin{figure}[htp]
+
+\centering
+\includegraphics[width=.32\textwidth]{1gyro_dead}\hfill
+\includegraphics[width=.32\textwidth]{2gyro_acc}\hfill
+\includegraphics[width=.32\textwidth]{3gyro_acc_mag}
+
+\caption{Euler angle readings, with and without various levels of correction. }
 \label{fig:figure3}
 
 \end{figure}

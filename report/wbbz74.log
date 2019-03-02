@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018) (preloaded format=pdflatex 2018.7.26)  1 MAR 2019 22:54
+This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018) (preloaded format=pdflatex 2018.7.26)  2 MAR 2019 13:56
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -537,7 +537,11 @@ Package: titling 2009/09/04 v2.1d maketitle typesetting
 (/usr/local/texlive/2018/texmf-dist/tex/latex/setspace/setspace.sty
 Package: setspace 2011/12/19 v6.7a set line spacing
 )
-(./wbbz74.aux)
+(./wbbz74.aux
+
+LaTeX Warning: Label `fig:figure3' multiply defined.
+
+)
 \openout1 = `wbbz74.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 28.
@@ -681,32 +685,51 @@ File: ./images/mag-unaltered.png Graphic file (type png)
 <use ./images/mag-unaltered.png>
 Package pdftex.def Info: ./images/mag-unaltered.png  used on input line 65.
 (pdftex.def)             Requested size: 168.82631pt x 126.61862pt.
+<./images/1gyro_dead.png, id=8, 462.528pt x 346.896pt>
+File: ./images/1gyro_dead.png Graphic file (type png)
+<use ./images/1gyro_dead.png>
+Package pdftex.def Info: ./images/1gyro_dead.png  used on input line 75.
+(pdftex.def)             Requested size: 168.82631pt x 126.61862pt.
+<./images/2gyro_acc.png, id=9, 462.528pt x 346.896pt>
+File: ./images/2gyro_acc.png Graphic file (type png)
+<use ./images/2gyro_acc.png>
+Package pdftex.def Info: ./images/2gyro_acc.png  used on input line 76.
+(pdftex.def)             Requested size: 168.82631pt x 126.61862pt.
+<./images/3gyro_acc_mag.png, id=10, 462.528pt x 346.896pt>
+File: ./images/3gyro_acc_mag.png Graphic file (type png)
+<use ./images/3gyro_acc_mag.png>
+Package pdftex.def Info: ./images/3gyro_acc_mag.png  used on input line 77.
+(pdftex.def)             Requested size: 168.82631pt x 126.61862pt.
  [1
 
 {/usr/local/texlive/2018/texmf-var/fonts/map/pdftex/updmap/pdftex.map} <./image
 s/gyro-unaltered.png> <./images/acc-unaltered.png> <./images/mag-unaltered.png>
-]
-(./wbbz74.aux) ) 
+] [2 <./images/1gyro_dead.png> <./images/2gyro_acc.png> <./images/3gyro_acc_mag
+.png>]
+(./wbbz74.aux)
+
+LaTeX Warning: There were multiply-defined labels.
+
+ ) 
 Here is how much of TeX's memory you used:
- 15825 strings out of 492649
- 322646 string characters out of 6129622
- 374087 words of memory out of 5000000
- 19388 multiletter control sequences out of 15000+600000
+ 15840 strings out of 492649
+ 323031 string characters out of 6129622
+ 375126 words of memory out of 5000000
+ 19400 multiletter control sequences out of 15000+600000
  15210 words of font info for 56 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 62i,6n,65p,425b,346s stack positions out of 5000i,500n,10000p,200000b,80000s
-</usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts
-/cm/cmbx10.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/
-cm/cmbx12.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/c
-m/cmmi10.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm
-/cmr10.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/c
-mr12.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cms
-y10.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt
-10.pfb>
-Output written on wbbz74.pdf (1 page, 207350 bytes).
+ 62i,6n,65p,480b,346s stack positions out of 5000i,500n,10000p,200000b,80000s
+</usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb
+></usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb>
+</usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb><
+/usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></u
+sr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr
+/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/
+local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb>
+Output written on wbbz74.pdf (2 pages, 329568 bytes).
 PDF statistics:
- 46 PDF objects out of 1000 (max. 8388607)
- 29 compressed objects within 1 object stream
+ 55 PDF objects out of 1000 (max. 8388607)
+ 31 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
- 28 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 43 words of extra memory for PDF output out of 10000 (max. 10000000)
 

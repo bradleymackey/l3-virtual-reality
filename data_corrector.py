@@ -138,7 +138,7 @@ def gyro_dead_reckoning(imu_data):
 
 def gyro_acc_positioning(imu_data):
     """computes current position using data both from the gyroscope and accelerometer"""
-    ALPHA_ACC = 0.01
+    ALPHA_ACC = 1
 
     print(">>> Tilt Correction <<<")
     curr_pos = np.array([1,0,0,0], dtype=np.float32)
@@ -167,7 +167,7 @@ def gyro_acc_positioning(imu_data):
         #inv_curr = qtrn_conj(curr_pos) / np.repeat(np.linalg.norm(curr_pos)**2,4)
         acc_qtrn = qtrn_mult(qtrn_mult(curr_pos, acc_qtrn), qtrn_conj(curr_pos))
         acc_vec = acc_qtrn[1:]
-        acc_vec = np.repeat(1/np.linalg.norm(acc_vec),3) * acc_vec
+        #acc_vec = np.repeat(1/np.linalg.norm(acc_vec),3) * acc_vec
         ### calculate the tilt error
         x, y = acc_vec[0], acc_vec[1]
         tilt_error_axis = np.array([-y, x, 0])
@@ -177,7 +177,7 @@ def gyro_acc_positioning(imu_data):
         cos_ang = cos_ang if cos_ang > -1 else -1
         cos_ang = cos_ang if cos_ang < +1 else +1
         tilt_error_angle = np.arccos(cos_ang)
-        #print("error angle:",tilt_error_angle)
+        print("error angle:",tilt_error_angle)
         ### Repair tilt using the comp filter
         comp_filter = axis_angle_to_qtrn(tilt_error_axis, -ALPHA_ACC*tilt_error_angle)
         # fix our current estimated position using acceleration data
@@ -194,7 +194,7 @@ def gyro_acc_positioning(imu_data):
 
 def gyro_acc_mag_positioning(imu_data):
     """corrects for tilt and yaw using the accelerometer and magnetometer"""
-    ALPHA_ACC = 0
+    ALPHA_ACC = 0.1
     ALPHA_YAW = 1
 
     print(">>> Tilt and Yaw Correction <<<")
@@ -252,14 +252,14 @@ def gyro_acc_mag_positioning(imu_data):
         mag_qtrn = np.insert(point[mag_range], 0, 0)
         mag_qtrn = qtrn_mult(qtrn_mult(curr_pos, mag_qtrn), qtrn_conj(curr_pos))
         # calculate yaw difference
-        # x = index 1, z = index 3 (first element is just 0, which we don't care about - it was only used to make up the length for a quaternion)
-        meas_x, meas_z = mag_qtrn[1], mag_qtrn[3]
-        yaw_angle_meas = np.arctan2(meas_x, meas_z)
-        real_x, real_z = m_ref[1], m_ref[3]
-        yaw_angle_real = np.arctan2(real_x, real_z)
+        # z is the up axis, so that is what we yaw around
+        meas_x, meas_y = mag_qtrn[1], mag_qtrn[2]
+        yaw_angle_meas = np.arctan2(meas_y, meas_x)
+        real_x, real_y = m_ref[1], m_ref[2]
+        yaw_angle_real = np.arctan2(real_y, real_x)
         yaw_diff = yaw_angle_meas - yaw_angle_real
         # repair yaw drift using complementary filter
-        tilt_yaw_axis = np.array([0, 1, 0])
+        tilt_yaw_axis = np.array([0, 0, 1])
         comp_filter = axis_angle_to_qtrn(tilt_yaw_axis, -ALPHA_YAW*yaw_diff)
         curr_pos = qtrn_mult(comp_filter, curr_pos)
 
@@ -352,6 +352,7 @@ def save_gyro_fig(name, title, data):
     plt.xlabel("Time (s)")
     plt.ylabel("Euler Angle (degs)")
     plt.title(title)
+    plt.grid()
     ax.plot(time_data, x_data, 'r-', label="X")
     ax.plot(time_data, y_data, 'g-', label="Y")
     ax.plot(time_data, z_data, 'b-', label="Z")
