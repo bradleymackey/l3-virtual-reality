@@ -13,6 +13,8 @@
 \usepackage[font=small,labelfont=bf]{caption} % Required for specifying captions to tables and figures
 \usepackage{pgfgantt} % gantt chart!
 \usepackage{titling}
+\usepackage{setspace}
+\renewcommand{\baselinestretch}{1.2} 
 
 \graphicspath{ {./images/} }
 
@@ -34,13 +36,22 @@
 \section*{Question Remarks}
 
 \begin{enumerate}
-\item \texttt{get\_sanitized\_imu\_data()} returns the corrected data readings from the csv file, returning a 2D array of data rows. \texttt{reading\_to\_qtrn(reading,prev\_sample\_time)} computes a quaternion $(a,b,c,d)$ from a given input gyroscope reading and previous sample time, such that the delta rotation is calculated correctly. \texttt{euler\_to\_qtrn(axis, angle)} takes an axis of rotation $(x,y,z)$ and angle $\theta$ in radians, returning a quaternion $(a,b,c,d)$.  \texttt{qtrn\_to\_euler(qtrn)} takes a quaternion $(a,b,c,d)$ and returns a tuple of the rotation axis and angle rotation this quaternion represents $((x,y,z),\theta)$. \texttt{qtrn\_conj(qtrn)} takes a quaternion $(a,b,c,d)$ and returns its conjugate, $(a,-b,-c,-d)$. \texttt{qtrn\_mult(qtrn\_1, qtrn\_2)} computes the product of 2 quaternions.
+\item 
+\texttt{get\_raw\_imu\_data()} returns the raw data readings from the \texttt{.csv} file (given that it is located in the same directory), returning a 2D array of data rows.\\
+\texttt{sanitize\_imu\_data(data)} cleans the data as specified, returning a 2D array of rows of the modified data.\\
+\texttt{euler\_to\_qtrn(euler)} computes a quaternion $(a,b,c,d)$ from a given array of Euler angles $(x,y,z)$.\\
+\texttt{qtrn\_to\_euler(qtrn)} computes the Euler angles $(x,y,z)$ for a given quaternion representation $(a,b,c,d)$.\\
+\texttt{qtrn\_conj(qtrn)} takes a quaternion $(a,b,c,d)$ and returns its conjugate, $(a,-b,-c,-d)$.\\
+\texttt{qtrn\_mult(qtrn\_1, qtrn\_2)} computes the product of 2 quaternions, returning this product $(a,b,c,d)$.
 
 % NO REPORT REQUIRED FOR QUESTION #2
 \skipitems{1} 
 
+% QUESTION 3: Try a few different alpha values (e.g., 0.01, 0.1, ...), investigate and comment on their effect on drift compensation in your report (7 marks)
 
-\item Try a few different alpha values (e.g., 0.01, 0.1, ...), investigate and comment on their effect on drift compensation in your report (7 marks)
+\item For the smallest values of $\alpha$ ($<0.001$), very little drift correction is applied and the headset is able to maintain smooth, albeit slightly misaligned motion after around 
+
+
 \item Try a few different alpha values (e.g., 0.01, 0.1, ...), investigate and comment on their effect on drift compensation in your report (5 marks).
 \end{enumerate}
 
