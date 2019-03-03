@@ -368,7 +368,11 @@ def save_gyro_fig(name, title, data):
 def animated_3d_plot(data):
     """produces a 3d animated plot of the given imu data"""
     plt.clf()
-    origin = np.array([0,0,0])
+
+    origin = [0,0,0]
+    x_basis = [1,0,0]
+    y_basis = [0,1,0]
+    z_basis = [0,0,1]
     soa = np.array([[0, 0, 0, 1, 0, 0], [0, 0, 0, 0, 1, 0], [0, 0, 0, 0, 0, 1]])
     red = (1,0,0)
     green = (0,1,0)
@@ -382,10 +386,6 @@ def animated_3d_plot(data):
 
     current_position = 0
 
-    def update_position():
-        soa = 
-
-
     ax.set_title("Dead Reckoning")
     
     ax.set_xlim([-1, 1])
@@ -395,29 +395,61 @@ def animated_3d_plot(data):
     ax.set_zlim([-1, 1])
     ax.set_zlabel('Z')
 
+    def update_position(point):
+        x, y, z = qtrn_to_euler(point[1:5])
+        new_x, new_y, new_z = [0] + x_basis, [0] + y_basis, [0] + z_basis
+        #print(new_x, new_y, new_z)
+        axis_angles = [(x_basis, x), (y_basis, y), (z_basis, z)]
+        for axis, angle in axis_angles:
+            new_x[0] = 0
+            new_y[0] = 0
+            new_z[0] = 0
+            point_qtrn = axis_angle_to_qtrn(axis, angle)
+            #print(point_qtrn)
+            new_x, new_y, new_z = list(map(lambda qtrn: qtrn_mult( qtrn_mult(point_qtrn, qtrn), qtrn_conj(point_qtrn)), [new_x, new_y, new_z]))
+        # get just the coordinates from quaternion
+        new_x, new_y, new_z = list(new_x[1:]), list(new_y[1:]), list(new_z[1:])
+        print(new_x, new_y, new_z)
+        soa = np.array([origin + new_x, origin + new_y, origin + new_z])
+        #print(soa)
+        X, Y, Z, U, V, W = zip(*soa)
+        ax.clear()
+        ax.set_xlim([-1, 1])
+        ax.set_xlabel('X')
+        ax.set_ylim([-1, 1])
+        ax.set_ylabel('Y')
+        ax.set_zlim([-1, 1])
+        ax.set_zlabel('Z')
+        ax.quiver(X, Y, Z, U, V, W, colors=colors)
+    
+
     # # Creating the Animation object
-    move_ani = animation.FuncAnimation(fig, update_lines, 25, fargs=(data, lines),
-                                    interval=50, blit=False)
+    move_ani = animation.FuncAnimation(fig, update_position, frames=data,
+                                        interval=10)
+
+    plt.show()
 
 
 
 
 # MAIN:
 def main():
-    animated_3d_plot(None)
+    
     #test()
     raw_data = get_raw_imu_data()
-    save_unmodified_figs(raw_data)
+    #save_unmodified_figs(raw_data)
     imu_data = sanitize_imu_data(raw_data)
 
     gyro_data = gyro_dead_reckoning(np.array(imu_data, copy=True))
-    save_gyro_fig("gyro_dead", "Dead-Reckoning (Gyro)", gyro_data)
+    #save_gyro_fig("gyro_dead", "Dead-Reckoning (Gyro)", gyro_data)
+    #print(gyro_data)
+    animated_3d_plot(gyro_data)
 
     acc_data = gyro_acc_positioning(np.array(imu_data, copy=True))
-    save_gyro_fig("gyro_acc", "Tilt Correction (Gyro + Acc)", acc_data)
+    #save_gyro_fig("gyro_acc", "Tilt Correction (Gyro + Acc)", acc_data)
     
     mag_data = gyro_acc_mag_positioning(imu_data)
-    save_gyro_fig("gyro_acc_mag", "Tilt & Yaw Correction (Gyro + Acc + Mag)", mag_data)
+    #save_gyro_fig("gyro_acc_mag", "Tilt & Yaw Correction (Gyro + Acc + Mag)", mag_data)
 
 if __name__=="__main__":
     main()

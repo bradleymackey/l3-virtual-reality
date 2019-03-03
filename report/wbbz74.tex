@@ -40,7 +40,7 @@
 \item 
 \texttt{get\_raw\_imu\_data()} returns the raw data readings from the \texttt{.csv} file (given that it is located in the same directory), returning a 2D array of data rows.\\
 \texttt{sanitize\_imu\_data(data)} cleans the data as specified, returning a 2D array of rows of the modified data.\\
-\texttt{euler\_to\_qtrn(euler)} computes a quaternion $(a,b,c,d)$ from a given array of Euler angles $(\theta,\psi,\phi)$, the rotations around the $x$, $y$ and $z$ axes respectively.\\
+\texttt{euler\_to\_qtrn(euler)} computes a quaternion $(a,b,c,d)$ from a given array of Euler angles $(\theta,\psi,\phi)$, the rotations around the $x$-, $y$- and $z$-axes respectively.\\
 \texttt{qtrn\_to\_euler(qtrn)} computes the Euler angles $(\theta,\psi,\phi)$ for a given quaternion representation $(a,b,c,d)$.\\
 \texttt{qtrn\_conj(qtrn)} takes a quaternion $(a,b,c,d)$ and returns its conjugate, $(a,-b,-c,-d)$.\\
 \texttt{qtrn\_mult(qtrn\_1, qtrn\_2)} computes the product of 2 quaternions, returning this product $(a,b,c,d)$.
@@ -83,7 +83,7 @@ The result of this correction can also been seen in Figure \ref{fig:euler-angles
 \includegraphics[width=.32\textwidth]{acc-unaltered}\hfill
 \includegraphics[width=.32\textwidth]{mag-unaltered}
 
-\caption{Raw sensor readings from the IMU.}
+\caption{Raw sensor readings from the IMU. Raw accelerometer data clearly displaying the $z$-axis as the initial `up' position, so tilt corrections are made towards this axis, yaw corrections are made around this axis.}
 \label{fig:raw-readings}
 
 \end{figure}
