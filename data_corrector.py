@@ -5,7 +5,8 @@
 ####################
 # tested on Python 3.7.2
 # ensure that the `IMUData.csv` file is located in the same directory as this script
-# to see the 3d visualisations, go down to the `main()` function and uncomment them (this may take a very long time to run though)
+# to see the 3d visualisations, go down to the `main()` function and un-comment them (this may take a very long time to run though - which is why they are initially commented out)
+# (my computer was only able to render at 1/40 speed)
 ###################
 
 import csv
@@ -431,14 +432,14 @@ def animated_3d_plot(data):
     plt.show()
 
 
-
-
 # MAIN:
 def main():
     
-    #test()
+    # get the raw data from the csv file
     raw_data = get_raw_imu_data()
-    #save_unmodified_figs(raw_data)
+    # save the raw data from the csv
+    save_unmodified_figs(raw_data)
+    # sanitise the data so that we can work with it effectively
     imu_data = sanitize_imu_data(raw_data)
 
     gyro_data = gyro_dead_reckoning(np.array(imu_data, copy=True))
