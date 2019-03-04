@@ -3,8 +3,9 @@
 # Virtual Reality coursework 18/19
 
 ####################
-# tested on Python 3.7.x
+# tested on Python 3.7.2
 # ensure that the `IMUData.csv` file is located in the same directory as this script
+# to see the 3d visualisations, go down to the `main()` function and uncomment them (this may take a very long time to run though)
 ###################
 
 import csv
@@ -197,7 +198,7 @@ def gyro_acc_positioning(imu_data):
 def gyro_acc_mag_positioning(imu_data):
     """corrects for tilt and yaw using the accelerometer and magnetometer"""
     ALPHA_ACC = 0.1
-    ALPHA_YAW = 0.0001
+    ALPHA_YAW = 0.001
 
     print(">>> Tilt and Yaw Correction <<<")
     curr_pos = np.array([1,0,0,0], dtype=np.float32)
@@ -397,19 +398,20 @@ def animated_3d_plot(data):
 
     def update_position(point):
         x, y, z = qtrn_to_euler(point[1:5])
+        print("TIME:",point[0])
+        print(x,y,z)
         new_x, new_y, new_z = [0] + x_basis, [0] + y_basis, [0] + z_basis
         #print(new_x, new_y, new_z)
         axis_angles = [(x_basis, x), (y_basis, y), (z_basis, z)]
         for axis, angle in axis_angles:
-            new_x[0] = 0
-            new_y[0] = 0
-            new_z[0] = 0
+            # reset the real part of the quaternion, so we can get an accurate rotation again
+            new_x[0], new_y[0], new_z[0]  = 0, 0, 0
             point_qtrn = axis_angle_to_qtrn(axis, angle)
             #print(point_qtrn)
             new_x, new_y, new_z = list(map(lambda qtrn: qtrn_mult( qtrn_mult(point_qtrn, qtrn), qtrn_conj(point_qtrn)), [new_x, new_y, new_z]))
         # get just the coordinates from quaternion
         new_x, new_y, new_z = list(new_x[1:]), list(new_y[1:]), list(new_z[1:])
-        print(new_x, new_y, new_z)
+        #print(new_x, new_y, new_z)
         soa = np.array([origin + new_x, origin + new_y, origin + new_z])
         #print(soa)
         X, Y, Z, U, V, W = zip(*soa)
@@ -423,10 +425,9 @@ def animated_3d_plot(data):
         ax.quiver(X, Y, Z, U, V, W, colors=colors)
     
 
-    # # Creating the Animation object
+    # Creating the Animation object
     move_ani = animation.FuncAnimation(fig, update_position, frames=data,
-                                        interval=10)
-
+                                        interval=1)
     plt.show()
 
 
@@ -441,15 +442,16 @@ def main():
     imu_data = sanitize_imu_data(raw_data)
 
     gyro_data = gyro_dead_reckoning(np.array(imu_data, copy=True))
-    #save_gyro_fig("gyro_dead", "Dead-Reckoning (Gyro)", gyro_data)
-    #print(gyro_data)
-    animated_3d_plot(gyro_data)
+    save_gyro_fig("gyro_dead", "Dead-Reckoning (Gyro)", gyro_data)
+    #animated_3d_plot(gyro_data)
 
     acc_data = gyro_acc_positioning(np.array(imu_data, copy=True))
-    #save_gyro_fig("gyro_acc", "Tilt Correction (Gyro + Acc)", acc_data)
-    
+    save_gyro_fig("gyro_acc", "Tilt Correction (Gyro + Acc)", acc_data)
+    #animated_3d_plot(acc_data)
+
     mag_data = gyro_acc_mag_positioning(imu_data)
-    #save_gyro_fig("gyro_acc_mag", "Tilt & Yaw Correction (Gyro + Acc + Mag)", mag_data)
+    save_gyro_fig("gyro_acc_mag", "Tilt & Yaw Correction (Gyro + Acc + Mag)", mag_data)
+    #animated_3d_plot(mag_data)
 
 if __name__=="__main__":
     main()
