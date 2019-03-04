@@ -66,10 +66,12 @@ A reduction in the noise could be reduced by taking the average position of the 
 
 \item 
 Yaw correction effects the Euler angle around the $x$-axis ($\theta$ angle) because of the initial mounted positioning of the IMU, explained above.
-I found that all values of $\alpha_{yaw}$ greater than 0.0001 were able to correct drift induced into the $\theta$ angle by the tilt correction and, as such, I found that $\alpha_{tilt}=0.1$ allowed a for more stable output in the other two axes.
+I found that all values of $\alpha_{yaw}$ greater than 0.0001 were able to correct drift induced into the $\theta$ angle by the tilt correction and, as such, I found that $\alpha_{tilt}=0.001$ allowed a for more stable output in the other two axes, without affecting the correction in the yaw axis.
 Increasing the value from this point all the way up to $\alpha_{yaw}=1$ maintained the positioning of the drift correction of the $x$-axis, but induced more noise into the Euler angle. 
-Therefore, the best angles for the combined tilt and yaw correction I found were $\alpha_{tilt}=0.1$ and $\alpha_{yaw}=0.0001$.
+Therefore, the best angles for the combined tilt and yaw correction I found were $\alpha_{tilt}=0.001$ and $\alpha_{yaw}=0.001$.
 The result of this correction can also been seen in Figure \ref{fig:euler-angles}.
+
+When experimenting with a value of $\alpha_{yaw}$ much greater than $\alpha_{tilt}$, I noticed very unusual (and obviously incorrect) results. This is likely due to the overcompensation of yaw correction while not taking into account the tilt drift error. This is why my $\alpha_{yaw}$ value is very small, as for this to not dominate the correction and produce incorrect results.
 
 
 \end{enumerate}
@@ -95,7 +97,19 @@ The result of this correction can also been seen in Figure \ref{fig:euler-angles
 \includegraphics[width=.32\textwidth]{2gyro_acc}\hfill
 \includegraphics[width=.32\textwidth]{3gyro_acc_mag}
 
-\caption{Euler angle readings, with and without various levels of correction. For tilt correction, $\alpha_{tilt}=0.01$. For tilt \& yaw correction, $\alpha_{tilt}=0.1$, $\alpha_{yaw}=0.001$. Notice the clear improvements and reduction in axis drift as more levels of error correction are added to the raw dead reckoning data.}
+\caption{Euler angle readings, with and without various levels of correction. For tilt correction, $\alpha_{tilt}=0.01$. For tilt \& yaw correction, $\alpha_{tilt}=0.001$, $\alpha_{yaw}=0.001$. Notice the clear improvements and reduction in axis drift as more levels of error correction are added to the raw dead reckoning data. The clear area of error reduction is in the two axes that are supposed to have 0 angle (these vary as the time progresses) between the times $t\approx3$ and $t\approx17$. The erratic angle changes occurring at $t\approx18$ and $t\approx20$ is caused by gimbal lock induced by the rotation of the IMU and the fact we are displaying this data as Euler angles.}
+\label{fig:euler-angles}
+
+\end{figure}
+
+\begin{figure}[htp]
+
+\centering
+\includegraphics[width=.32\textwidth]{4gyro_after}\hfill
+\includegraphics[width=.32\textwidth]{5acc_after}\hfill
+\includegraphics[width=.32\textwidth]{6mag_after}
+
+\caption{From left to right: dead reckoning, tilt correction, tilt \& yaw correction. The blue, green and red vectors correspond to the $z$, $y$ and $x$ vectors respectively. Vectors shown are the final positions of the IMU after all data points were played back. It is clear there is less drift as more levels of correction are included in the calculation of the true orientation Data was recorded for each of the correction methods and interactively displayed in 3D using \texttt{matplotlib} for Python. Due to technological constraints, data was recorded at 40x slower than realtime, recorded and played back at realtime, then half speed. With all levels of correction, the micro-judders caused by twitchy movements of the IMU are not able to be corrected, so the judders are visible in all animations. The reduced drift is noticeable in both the tilt and tilt \& yaw corrected movements though---although the difference between these two is minor.}
 \label{fig:euler-angles}
 
 \end{figure}

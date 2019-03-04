@@ -197,7 +197,7 @@ def gyro_acc_positioning(imu_data):
 
 def gyro_acc_mag_positioning(imu_data):
     """corrects for tilt and yaw using the accelerometer and magnetometer"""
-    ALPHA_ACC = 0.1
+    ALPHA_ACC = 0.001
     ALPHA_YAW = 0.001
 
     print(">>> Tilt and Yaw Correction <<<")
