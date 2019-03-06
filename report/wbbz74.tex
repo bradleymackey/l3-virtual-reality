@@ -1,4 +1,5 @@
 \documentclass[11pt]{article}
+\renewcommand{\familydefault}{\sfdefault}
 
 % Make margins smaller
 \usepackage[top=1in, bottom=1in, left=1in, right=1in]{geometry}
@@ -56,9 +57,11 @@ For the smallest values of $\alpha_{tilt}$ ($<0.001$), very little drift correct
 For high values of $\alpha_{tilt}$ (0.1--1), after around 20 seconds I noticed the Euler angle around the $x$-axis begins to drift by around $-25\degree$ towards the end of the readings. 
 This is due to the fact that as the IMU is drift corrected, drift correction rotation occurs around the $x$-$y$ plane only (as $z$ is the `up' axis, pointing upwards initially according to the accelerometer, shown in Figure \ref{fig:raw-readings}). 
 As such, a yaw motion around the $z$-axis is represented by the $x$ (or $\theta$) Euler angle here. 
+
 The action of correcting the tilt can slightly induce a drift into this angle, so high values of $\alpha_{tilt}$ are not preferable, as this effect becomes more exaggerated.
 Additionally, high values of $\alpha_{tilt}$ can cause very noisy positional readings as each movement is precisely drift corrected.
 This would cause a very unpleasant viewing experience for a VR user as the viewport abruptly snaps back to a correct position with each IMU reading.
+
 I found that an $\alpha_{tilt}$ value of around 0.01 resulted in good drift correction without the large amount of noise caused by correction. This is visible in Figure \ref{fig:euler-angles}.
 A reduction in the noise could be reduced by taking the average position of the `up vector' over a number of samples in proximity.
 
@@ -85,7 +88,7 @@ When experimenting with a value of $\alpha_{yaw}$ much greater than $\alpha_{til
 \includegraphics[width=.32\textwidth]{acc-unaltered}\hfill
 \includegraphics[width=.32\textwidth]{mag-unaltered}
 
-\caption{Raw sensor readings from the IMU. Raw accelerometer data clearly displaying the $z$-axis as the initial `up' position, so tilt corrections are made towards this axis, yaw corrections are made around this axis.}
+\caption{Raw sensor readings from the IMU. Raw accelerometer data (centre) clearly displaying the $z$-axis as the initial `up' position (reading of $g$), so tilt corrections are made towards this axis, yaw corrections are made around this axis.}
 \label{fig:raw-readings}
 
 \end{figure}
@@ -109,11 +112,14 @@ When experimenting with a value of $\alpha_{yaw}$ much greater than $\alpha_{til
 \includegraphics[width=.32\textwidth]{5acc_after}\hfill
 \includegraphics[width=.32\textwidth]{6mag_after}
 
-\caption{From left to right: dead reckoning, tilt correction, tilt \& yaw correction. The blue, green and red vectors correspond to the $z$, $y$ and $x$ vectors respectively. Vectors shown are the final positions of the IMU after all data points were played back. It is clear there is less drift as more levels of correction are included in the calculation of the true orientation Data was recorded for each of the correction methods and interactively displayed in 3D using \texttt{matplotlib} for Python. Due to technological constraints, data was recorded at 40x slower than realtime, recorded and played back at realtime, then half speed. With all levels of correction, the micro-judders caused by twitchy movements of the IMU are not able to be corrected, so the judders are visible in all animations. The reduced drift is noticeable in both the tilt and tilt \& yaw corrected movements though---although the difference between these two is minor. Overall, I found that tilt correction alone was able to dramatically increase the positional accuracy of the raw IMU data, yaw correction only slightly improving this accuracy. }
-\label{fig:euler-angles}
+\caption{From left to right: dead reckoning, tilt correction, tilt \& yaw correction. The blue, green and red vectors correspond to the $z$, $y$ and $x$ vectors respectively. Vectors shown are the final positions of the IMU after all data points were played back.}
+\label{fig:3d}
 
 \end{figure}
 
+Figure \ref{fig:3d} shows screenshots from the playback of data for each correction method. It is clear there is less drift as more levels of correction are included in the calculation of the true orientation Data was recorded for each of the correction methods and interactively displayed in 3D using \texttt{matplotlib} for Python. 
+
+Due to technological constraints, data was recorded at 40x slower than realtime, recorded and played back at realtime, then half speed. With all levels of correction, the micro-judders caused by twitchy movements of the IMU are not able to be corrected, so these slight judders are visible in all animations. The reduced drift is noticeable in both the tilt and tilt \& yaw corrected movements though---although the difference between these two is minor. Overall, I found that tilt correction alone was able to dramatically increase the positional accuracy of the raw IMU data, yaw correction only slightly improving this accuracy.
 
 
 \end{document}
