@@ -53,29 +53,26 @@
 
 \item 
 
-For the smallest values of $\alpha_{tilt}$ ($<0.001$), very little drift correction is applied and the headset is able to maintain smooth, albeit slightly misaligned motion after correction. 
-For high values of $\alpha_{tilt}$ (0.1--1), after around 20 seconds I noticed the Euler angle around the $x$-axis begins to drift by around $-25\degree$ towards the end of the readings. 
-This is due to the fact that as the IMU is drift corrected, drift correction rotation occurs around the $x$-$y$ plane only (as $z$ is the `up' axis, pointing upwards initially according to the accelerometer, shown in Figure \ref{fig:raw-readings}). 
-As such, a yaw motion around the $z$-axis is represented by the $x$ (or $\theta$) Euler angle here. 
+For tilt correction, we adjust the $z$ `up' vector to align with the true up vector in the real world, as measured by the accelerometer. This is because this is the first angle measured by the IMU, so we assume this is up. This could well be the case if the IMU is physically mounted in such a way that the $z$ vector points upright.
+For the smallest values of $\alpha_{tilt}$ ($<0.001$), very little drift correction is applied, making the effect of this similar to no drift correction at all, as can bee seen in the dead-reckoning.
+The effect of this would remain a smooth experience for a user of the VR headset, but the drift problem has not been addressed, and a clear drift of around $20\degree$ can be see at the end of the capture.
+For very large values of $\alpha_{tilt}$ (0.1--1), extremely erratic and sharply-changing angles can be seen in the $\phi$ and $\psi$ Euler angles as the tilt correction is applied. 
+These rapid angle changes are due to the fact that as a large amount of tilt correction is applied with each reading, the angle must be sharply adjusted.
+This would make for an unusable and very unpleasant experience for a VR user, as the world frame would constantly `judder' back into a correct orientation despite the user's head movements---expect nausea!
 
-The action of correcting the tilt can slightly induce a drift into this angle, so high values of $\alpha_{tilt}$ are not preferable, as this effect becomes more exaggerated.
-Additionally, high values of $\alpha_{tilt}$ can cause very noisy positional readings as each movement is precisely drift corrected.
-This would cause a very unpleasant viewing experience for a VR user as the viewport abruptly snaps back to a correct position with each IMU reading.
-
-I found that an $\alpha_{tilt}$ value of around 0.01 resulted in good drift correction without the large amount of noise caused by correction. This is visible in Figure \ref{fig:euler-angles}.
-A reduction in the noise could be reduced by taking the average position of the `up vector' over a number of samples in proximity.
+I found that an $\alpha_{tilt}$ value of around 0.001 resulted in good drift correction, able to dramatically reduce the amount of drift present at the end of the dead-reckoning reading. This is visible in Figure \ref{fig:euler-angles}.
+A reduction in correction noise could be applied by taking the average position of the `up vector' over a number of samples in proximity, meaning that successive corrections are changed by a similar angle.
 
 % QUESTION 4: Try a few different alpha values (e.g., 0.01, 0.1, ...), investigate and comment on their effect on drift compensation in your report (5 marks).
 
 \item 
-Yaw correction effects the Euler angle around the $x$-axis ($\theta$ angle) because of the initial mounted positioning of the IMU, explained above.
-I found that all values of $\alpha_{yaw}$ greater than 0.0001 were able to correct drift induced into the $\theta$ angle by the tilt correction and, as such, I found that $\alpha_{tilt}=0.001$ allowed a for more stable output in the other two axes, without affecting the correction in the yaw axis.
-Increasing the value from this point all the way up to $\alpha_{yaw}=1$ maintained the positioning of the drift correction of the $x$-axis, but induced more noise into the Euler angle. 
-Therefore, the best angles for the combined tilt and yaw correction I found were $\alpha_{tilt}=0.001$ and $\alpha_{yaw}=0.001$.
-The result of this correction can also been seen in Figure \ref{fig:euler-angles}.
+Yaw correction effects the Euler angle around the $z$-axis ($\psi$ angle) because of the initial mounted positioning of the IMU, explained above.
+Firstly, I found that the yaw correction had a much smaller effect than compared to tilt correction, due to the tilt correction already having a large positive effect on reducing the drift of the readings. 
 
-When experimenting with a value of $\alpha_{yaw}$ much greater than $\alpha_{tilt}$, I noticed very unusual (and obviously incorrect) results. This is likely due to the overcompensation of yaw correction while not taking into account the tilt drift error. This is why my $\alpha_{yaw}$ value is very small, as for this to not dominate the correction and produce incorrect results.
+Keeping $\alpha_{tilt}$ set at 0.001, I found that all values of $\alpha_{yaw}$ greater than 0.0001 were able to correct additional minor amounts of drift about the $z$-axis.  
+Similarly to tilt correction, I found values of $\alpha_{yaw}$ that were larger than $\alpha_{tilt}$ caused conflicts in the drift correction, and resulted in incorrect readings being produced. This would also have the effect of causing very juddery motion for the viewer of the VR world.
 
+In the end, I found that a much smaller value of $\alpha_{yaw}$, 0.0001, was able to correct slight drift around the $z$-axis and allow the drift at the end of the reading to end up very close to zero.
 
 \end{enumerate}
 
@@ -100,7 +97,7 @@ When experimenting with a value of $\alpha_{yaw}$ much greater than $\alpha_{til
 \includegraphics[width=.32\textwidth]{2gyro_acc}\hfill
 \includegraphics[width=.32\textwidth]{3gyro_acc_mag}
 
-\caption{Euler angle readings, with and without various levels of correction. For tilt correction, $\alpha_{tilt}=0.01$. For tilt \& yaw correction, $\alpha_{tilt}=0.001$, $\alpha_{yaw}=0.001$. Notice the clear improvements and reduction in axis drift as more levels of error correction are added to the raw dead reckoning data. The clear area of error reduction is in the two axes that are supposed to have 0 angle (these vary as the time progresses) between the times $t\approx3$ and $t\approx17$. The erratic angle changes occurring at $t\approx18$ and $t\approx20$ is caused by gimbal lock induced by the rotation of the IMU and the fact we are displaying this data as Euler angles.}
+\caption{Euler angle readings, with and without various levels of correction. For tilt correction, $\alpha_{tilt}=0.001$. For tilt \& yaw correction, $\alpha_{tilt}=0.001$, $\alpha_{yaw}=0.0001$. Notice the clear improvements and reduction in axis drift as more levels of error correction are added to the raw dead-reckoning data. Error reduction can be most clearly seen at the end of the reading, where the drift is minimal with corrections. The erratic angle changes occurring at $t\approx14$ and $t\approx15$ is caused by gimbal lock induced by the rotation of the IMU and the fact we are displaying this data as Euler angles, which is a major limitation of the Euler angle representation.}
 \label{fig:euler-angles}
 
 \end{figure}
@@ -112,7 +109,7 @@ When experimenting with a value of $\alpha_{yaw}$ much greater than $\alpha_{til
 \includegraphics[width=.32\textwidth]{5acc_after}\hfill
 \includegraphics[width=.32\textwidth]{6mag_after}
 
-\caption{From left to right: dead reckoning, tilt correction, tilt \& yaw correction. The blue, green and red vectors correspond to the $z$, $y$ and $x$ vectors respectively. Vectors shown are the final positions of the IMU after all data points were played back.}
+\caption{From left to right: dead reckoning, tilt correction, tilt \& yaw correction. The blue, green and red vectors correspond to the $z$, $y$ and $x$ vectors respectively. Vectors shown are the final positions of the IMU after all data points were played back. See document prose for more information.}
 \label{fig:3d}
 
 \end{figure}
