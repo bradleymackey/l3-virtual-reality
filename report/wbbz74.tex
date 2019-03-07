@@ -61,7 +61,7 @@ These rapid angle changes are due to the fact that as a large amount of tilt cor
 This would make for an unusable and very unpleasant experience for a VR user, as the world frame would constantly `judder' back into a correct orientation despite the user's head movements---expect nausea!
 
 I found that an $\alpha_{tilt}$ value of around 0.001 resulted in good drift correction, able to dramatically reduce the amount of drift present at the end of the dead-reckoning reading. This is visible in Figure \ref{fig:euler-angles}.
-A reduction in correction noise could be applied by taking the average position of the `up vector' over a number of samples in proximity, meaning that successive corrections are changed by a similar angle.
+A reduction in correction noise could be applied by taking the average position of the `up vector' over a number of samples in proximity, meaning that successive corrections are changed by a similar angle, making angle changes less sharp and noticable.
 
 % QUESTION 4: Try a few different alpha values (e.g., 0.01, 0.1, ...), investigate and comment on their effect on drift compensation in your report (5 marks).
 
@@ -69,10 +69,10 @@ A reduction in correction noise could be applied by taking the average position 
 Yaw correction effects the Euler angle around the $z$-axis ($\psi$ angle) because of the initial mounted positioning of the IMU, explained above.
 Firstly, I found that the yaw correction had a much smaller effect than compared to tilt correction, due to the tilt correction already having a large positive effect on reducing the drift of the readings. 
 
-Keeping $\alpha_{tilt}$ set at 0.001, I found that all values of $\alpha_{yaw}$ greater than 0.0001 were able to correct additional minor amounts of drift about the $z$-axis.  
+Keeping $\alpha_{tilt}$ set at 0.001, I found that all values of $\alpha_{yaw}$ greater than 0.00001 were able to correct additional minor amounts of drift about the $z$-axis, values below this being unnoticable.  
 Similarly to tilt correction, I found values of $\alpha_{yaw}$ that were larger than $\alpha_{tilt}$ caused conflicts in the drift correction, and resulted in incorrect readings being produced. This would also have the effect of causing very juddery motion for the viewer of the VR world.
 
-In the end, I found that a much smaller value of $\alpha_{yaw}$, 0.0001, was able to correct slight drift around the $z$-axis and allow the drift at the end of the reading to end up very close to zero.
+In the end, this left only one real effective value for $\alpha_{yaw}$, 0.0001. This was able to correct slight drift around the $z$-axis and allow the drift at the end of the reading to end up very close to zero.
 
 \end{enumerate}
 
