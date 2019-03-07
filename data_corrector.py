@@ -181,7 +181,7 @@ def gyro_acc_positioning(imu_data):
         cos_ang = cos_ang if cos_ang > -1 else -1
         cos_ang = cos_ang if cos_ang < +1 else +1
         tilt_error_angle = np.arccos(cos_ang)
-        print("error angle:",tilt_error_angle)
+        #print("error angle:",tilt_error_angle)
         ### Repair tilt using the comp filter
         comp_filter = axis_angle_to_qtrn(tilt_error_axis, -ALPHA_ACC*tilt_error_angle)
         # fix our current estimated position using acceleration data
