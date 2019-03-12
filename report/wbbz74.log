@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018) (preloaded format=pdflatex 2018.7.26)  7 MAR 2019 17:33
+This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018) (preloaded format=pdflatex 2018.7.26)  12 MAR 2019 14:14
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -565,14 +565,14 @@ LaTeX Font Info:    ... okay on input line 30.
 * layoutoffset:(h,v)=(0.0pt,0.0pt)
 * modes: 
 * h-part:(L,W,R)=(72.26999pt, 469.75502pt, 72.26999pt)
-* v-part:(T,H,B)=(72.26999pt, 650.43001pt, 72.26999pt)
+* v-part:(T,H,B)=(65.04256pt, 664.88487pt, 65.04256pt)
 * \paperwidth=614.295pt
 * \paperheight=794.96999pt
 * \textwidth=469.75502pt
-* \textheight=650.43001pt
+* \textheight=664.88487pt
 * \oddsidemargin=0.0pt
 * \evensidemargin=0.0pt
-* \topmargin=-37.0pt
+* \topmargin=-44.22743pt
 * \headheight=12.0pt
 * \headsep=25.0pt
 * \topskip=11.0pt
@@ -660,101 +660,4 @@ Package caption Info: End \AtBeginDocument code.
 
 ABD: EveryShipout initializing macros
 LaTeX Info: Redefining \celsius on input line 30.
-Package gensymb Info: Faking symbols for \degree and \celsius on input line 30.
-
-
-
-Package gensymb Warning: Not defining \perthousand.
-
-LaTeX Info: Redefining \ohm on input line 30.
-Package gensymb Info: Using \Omega for \ohm on input line 30.
-
-Package gensymb Warning: Not defining \micro.
-
-LaTeX Font Info:    Try loading font information for U+msa on input line 35.
-(/usr/local/texlive/2018/texmf-dist/tex/latex/amsfonts/umsa.fd
-File: umsa.fd 2013/01/14 v3.01 AMS symbols A
-)
-LaTeX Font Info:    Try loading font information for U+msb on input line 35.
-
-(/usr/local/texlive/2018/texmf-dist/tex/latex/amsfonts/umsb.fd
-File: umsb.fd 2013/01/14 v3.01 AMS symbols B
-) [1
-
-{/usr/local/texlive/2018/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]
-<./images/gyro-unaltered.png, id=18, 462.528pt x 346.896pt>
-File: ./images/gyro-unaltered.png Graphic file (type png)
-<use ./images/gyro-unaltered.png>
-Package pdftex.def Info: ./images/gyro-unaltered.png  used on input line 84.
-(pdftex.def)             Requested size: 150.32504pt x 112.74515pt.
-<./images/acc-unaltered.png, id=20, 462.528pt x 346.896pt>
-File: ./images/acc-unaltered.png Graphic file (type png)
-<use ./images/acc-unaltered.png>
-Package pdftex.def Info: ./images/acc-unaltered.png  used on input line 85.
-(pdftex.def)             Requested size: 150.32504pt x 112.74515pt.
-<./images/mag-unaltered.png, id=21, 462.528pt x 346.896pt>
-File: ./images/mag-unaltered.png Graphic file (type png)
-<use ./images/mag-unaltered.png>
-Package pdftex.def Info: ./images/mag-unaltered.png  used on input line 86.
-(pdftex.def)             Requested size: 150.32504pt x 112.74515pt.
-<./images/1gyro_dead.png, id=22, 462.528pt x 346.896pt>
-File: ./images/1gyro_dead.png Graphic file (type png)
-<use ./images/1gyro_dead.png>
-Package pdftex.def Info: ./images/1gyro_dead.png  used on input line 96.
-(pdftex.def)             Requested size: 150.32504pt x 112.74515pt.
-<./images/2gyro_acc.png, id=23, 462.528pt x 346.896pt>
-File: ./images/2gyro_acc.png Graphic file (type png)
-<use ./images/2gyro_acc.png>
-Package pdftex.def Info: ./images/2gyro_acc.png  used on input line 97.
-(pdftex.def)             Requested size: 150.32504pt x 112.74515pt.
-<./images/3gyro_acc_mag.png, id=24, 462.528pt x 346.896pt>
-File: ./images/3gyro_acc_mag.png Graphic file (type png)
-<use ./images/3gyro_acc_mag.png>
-Package pdftex.def Info: ./images/3gyro_acc_mag.png  used on input line 98.
-(pdftex.def)             Requested size: 150.32504pt x 112.74515pt.
-<./images/4gyro_after.png, id=25, 557.08125pt x 437.635pt>
-File: ./images/4gyro_after.png Graphic file (type png)
-<use ./images/4gyro_after.png>
-Package pdftex.def Info: ./images/4gyro_after.png  used on input line 108.
-(pdftex.def)             Requested size: 150.32504pt x 118.08957pt.
-<./images/5acc_after.png, id=26, 567.11874pt x 444.66125pt>
-File: ./images/5acc_after.png Graphic file (type png)
-<use ./images/5acc_after.png>
-Package pdftex.def Info: ./images/5acc_after.png  used on input line 109.
-(pdftex.def)             Requested size: 150.32504pt x 117.8618pt.
-<./images/6mag_after.png, id=27, 549.05125pt x 451.6875pt>
-File: ./images/6mag_after.png Graphic file (type png)
-<use ./images/6mag_after.png>
-Package pdftex.def Info: ./images/6mag_after.png  used on input line 110.
-(pdftex.def)             Requested size: 150.32504pt x 123.6665pt.
- [2 <./images/gyro-unaltered.png> <./images/acc-unaltered.png> <./images/mag-un
-altered.png>]
-[3 <./images/1gyro_dead.png> <./images/2gyro_acc.png> <./images/3gyro_acc_mag.p
-ng> <./images/4gyro_after.png> <./images/5acc_after.png> <./images/6mag_after.p
-ng>] (./wbbz74.aux) ) 
-Here is how much of TeX's memory you used:
- 15936 strings out of 492649
- 324427 string characters out of 6129622
- 378301 words of memory out of 5000000
- 19478 multiletter control sequences out of 15000+600000
- 20559 words of font info for 76 fonts, out of 8000000 for 9000
- 1141 hyphenation exceptions out of 8191
- 62i,6n,65p,807b,373s stack positions out of 5000i,500n,10000p,200000b,80000s
-</usr/local/texlive/2018/texmf-dist/fonts/type1/public/ams
-fonts/cm/cmmi10.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsf
-onts/cm/cmmi7.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfon
-ts/cm/cmmi8.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts
-/cm/cmr10.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/c
-m/cmss10.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm
-/cmss12.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/
-cmssbx10.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm
-/cmsy10.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/
-cmsy8.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cm
-tt10.pfb>
-Output written on wbbz74.pdf (3 pages, 1201771 bytes).
-PDF statistics:
- 76 PDF objects out of 1000 (max. 8388607)
- 42 compressed objects within 1 object stream
- 0 named destinations out of 1000 (max. 500000)
- 58 words of extra memory for PDF output out of 10000 (max. 10000000)
-
+Package gensymb Info: Faking symbo

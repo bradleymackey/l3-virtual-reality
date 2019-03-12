@@ -2,7 +2,7 @@
 \renewcommand{\familydefault}{\sfdefault}
 
 % Make margins smaller
-\usepackage[top=1in, bottom=1in, left=1in, right=1in]{geometry}
+\usepackage[top=0.9in, bottom=0.9in, left=1in, right=1in]{geometry}
 % more advanced mathematical symbols
 \usepackage{amsfonts}
 \usepackage{amssymb}
@@ -116,7 +116,9 @@ In the end, this left only one real effective value for $\alpha_{yaw}$, 0.0001. 
 
 Figure \ref{fig:3d} shows screenshots from the playback of data for each correction method. It is clear there is less drift as more levels of correction are included in the calculation of the true orientation Data was recorded for each of the correction methods and interactively displayed in 3D using \texttt{matplotlib} for Python. 
 
-Due to technological constraints, data was recorded at 40x slower than realtime, recorded and played back at realtime, then half speed. With all levels of correction, the micro-judders caused by twitchy movements of the IMU are not able to be corrected, so these slight judders are visible in all animations. The reduced drift is noticeable in both the tilt and tilt \& yaw corrected movements though---although the difference between these two is minor. Overall, I found that tilt correction alone was able to dramatically increase the positional accuracy of the raw IMU data, yaw correction only slightly improving this accuracy.
+Due to technological constraints, data was recorded at 40x slower than realtime, recorded and played back at realtime, then half speed (the rendering was very slow on my computer for some reason). With all levels of correction, the micro-judders caused by twitchy movements of the IMU are not able to be corrected, so these slight judders are visible in all animations. In the case of the corrected movements, the judders are somewhat exaggerated at some points at the corrections are applied to the rotation, but this effect is quite minor. The reduced drift is noticeable in both the tilt and tilt \& yaw corrected movements though---although the difference between these two is very small. 
+
+Overall, I found that tilt correction alone was able to dramatically increase the positional accuracy of the raw IMU data, yaw correction only slightly improving this accuracy.
 
 
 \end{document}
